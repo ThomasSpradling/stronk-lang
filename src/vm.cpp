@@ -4,18 +4,22 @@
 
 VirtualMachine::VirtualMachine() : _compiler(Compiler()) {}
 
+// Utility method for adding to VM stack.
 void VirtualMachine::__stack_push(Value val) {
     if (stack.size() >= STACK_MAX) {
         throw std::out_of_range("Stack overflow");
     }
     stack.push(val);
 }
+
+// Utility method for popping from VM stack.
 Value VirtualMachine::__stack_pop() {
     Value res = stack.top();
     stack.pop();
     return res;
 }
 
+// Interprets the compiled source.
 InterpretResult VirtualMachine::interpret(const std::string source) {
     _compiler.compile(source);
     return INTERPRET_OK;
@@ -28,6 +32,7 @@ InterpretResult VirtualMachine::interpret(const std::string source) {
 // Runs the virtual machine by checking each instruction code.
 InterpretResult VirtualMachine::run() {
 
+// Messy hack to make same task simpler.
 #define BINARY_OP(op) \
     do { \
         double b = __stack_pop(); \
@@ -42,12 +47,12 @@ InterpretResult VirtualMachine::run() {
         int offset = std::distance(_chunk.get_code().begin(), ip);
         disassemble_instruction(_chunk, offset);
 #endif
-        uint8_t instr;
+        // uint8_t instr;
         Value constant;
         int left, mid, right;
 
         // Read a byte from _chunk, which ip points to.
-        switch (instr = *ip++) {
+        switch (*ip++) {
             case OP_CONSTANT:
                 constant = _chunk.get_constant(*ip++);
                 __stack_push(constant);

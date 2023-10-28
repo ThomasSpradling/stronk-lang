@@ -24,6 +24,8 @@ using namespace std::chrono;
     std::cout << duration.count() / 1000.0 << " ms\n";
 #endif
 
+// Starts reading from standard input as a REPL and
+// compiles + interprets (the bytecode) of each line.
 static void repl(VirtualMachine &vm) {
     std::string line;
     for (;;) {
@@ -43,6 +45,8 @@ static void repl(VirtualMachine &vm) {
     }
 }
 
+// Reads an entire file and feeds contents to VM to
+// compiler and interpret it.
 static void run_file(VirtualMachine &vm, std::string path) {
     // Turn file into a string.
     std::ifstream istream(path);

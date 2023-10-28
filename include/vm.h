@@ -15,6 +15,8 @@ enum InterpretResult {
     INTERPRET_RUNTIME_ERROR
 };
 
+// Virtual machine for the bytecode produced by the
+// compiler.
 class VirtualMachine {
 private:
     Chunk _chunk;

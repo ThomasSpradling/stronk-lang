@@ -3,6 +3,8 @@
 
 #include <string>
 
+// Lexical analysis over the source to allow for
+// compiling.
 class Scanner {
 private:
     std::string::iterator _start;

@@ -3,6 +3,8 @@
 
 #include <string>
 
+// Compiles tokens provided by Scanner into
+// bytecode.
 class Compiler {
 public:
     Compiler();

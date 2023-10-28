@@ -3,11 +3,15 @@
 #include "debug.h"
 #include "value.h"
 
+// Prints an instruction that only has an associated name.
 auto __simple_instruction(std::string name, int offset) -> int {
     std::cout << name << "\n";
     return offset + 1;
 }
 
+// Prints the an instruction and the following bytecode part.
+// Best suitable for OP_CONSTANT which take up two
+// bytecodes to form.
 auto __constant_instruction(std::string name, const Chunk &chunk, int offset) -> int {
     int constant = chunk.get_chunk(offset + 1);
     std::cout << std::left << std::setw(16) << std::setfill(' ') << name << std::right << std::setw(3) << std::setfill('0') << constant << " '";
@@ -16,6 +20,9 @@ auto __constant_instruction(std::string name, const Chunk &chunk, int offset) ->
     return offset + 2;
 }
 
+// Prints an instruction along with the next three bytecodes.
+// Best suitable for OP_CONSTANT_LONG which takes up four
+// bytecodes to form.
 auto __constant_long_instruction(std::string name, const Chunk &chunk, int offset) -> int {
     int left = chunk.get_chunk(offset + 1);
     int mid = chunk.get_chunk(offset + 2);
@@ -27,6 +34,8 @@ auto __constant_long_instruction(std::string name, const Chunk &chunk, int offse
     return offset + 4;
 }
 
+// Prints a single instruction (as given by offset) in a
+// human-friendly format.
 auto disassemble_instruction(const Chunk &chunk, int offset) -> int {
     std::cout << std::setw(4) << std::setfill('0') << offset << " ";
 
@@ -62,6 +71,8 @@ auto disassemble_instruction(const Chunk &chunk, int offset) -> int {
     }
 }
 
+// Prints an entire chunk of instructions in a human-friendly
+// format.
 void disassemble_chunk(const Chunk &chunk, std::string_view name) {
     std::cout << "== " << name << " ==\n";
 
@@ -70,6 +81,8 @@ void disassemble_chunk(const Chunk &chunk, std::string_view name) {
     }
 }
 
+// Prints a stack of Values. Best used for printing the VM stack
+// in a human-friendly way.
 void print_stack(std::stack<Value> &stack) {
     std::cout << "          ";
     if (stack.empty()) {
