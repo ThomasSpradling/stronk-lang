@@ -27,7 +27,7 @@ auto __constant_long_instruction(std::string name, const Chunk &chunk, int offse
     return offset + 4;
 }
 
-auto __disassemble_instruction(const Chunk &chunk, int offset) -> int {
+auto disassemble_instruction(const Chunk &chunk, int offset) -> int {
     std::cout << std::setw(4) << std::setfill('0') << offset << " ";
 
     if (offset > 0 && chunk.get_line(offset) == chunk.get_line(offset - 1)) {
@@ -55,6 +55,6 @@ void disassemble_chunk(const Chunk &chunk, std::string_view name) {
     std::cout << "== " << name << " ==\n";
 
     for (int offset = 0; offset < chunk.size();) {
-        offset = __disassemble_instruction(chunk, offset);
+        offset = disassemble_instruction(chunk, offset);
     }
 }

@@ -2,7 +2,6 @@
 #define _STRONK_CHUNK_H
 
 #include <vector>
-#include <iostream>
 #include <map>
 #include "value.h"
 
@@ -29,10 +28,10 @@ public:
 
     auto size() const -> size_t;
     
-    auto get_code() const -> std::vector<uint8_t> {
+    auto get_code() -> std::vector<uint8_t> & {
         return code;
     }
-    auto get_constants() const -> ValueArray {
+    auto get_constants() -> ValueArray & {
         return constants;
     }
 };

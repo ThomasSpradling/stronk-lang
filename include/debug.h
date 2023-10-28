@@ -5,6 +5,7 @@
 #include <string_view>
 #include "chunk.h"
 
+auto disassemble_instruction(const Chunk &chunk, int offset) -> int;
 void disassemble_chunk(const Chunk &chunk, std::string_view name);
 
 #endif // _STRONK_DEBUG_H
