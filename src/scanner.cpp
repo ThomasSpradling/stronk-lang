@@ -49,6 +49,9 @@ auto Scanner::ScanToken() -> Token {
     // Get next character and move forward.
     char c = *(_current++);
 
+    if (IsAlpha(c)) {
+        return ScanIdentifier();
+    }
     if (IsDigit(c)) {
         return ScanNumber();
     }
@@ -119,6 +122,60 @@ auto Scanner::ScanNumber() -> Token {
     }
 
     return MakeToken(TokenType::NUMBER);
+}
+
+// Determines if character a letter or underscore.
+auto Scanner::IsAlpha(char c) -> bool {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'; 
+}
+
+auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> Token {
+    std::string_view::iterator start_iter = _start + start;
+    std::string_view view(start_iter, length);
+    if (view == rest) {
+        return MakeToken(type);
+    }
+
+    return MakeToken(TokenType::IDENTIFIER);
+}
+
+// Scans identifier, which begin with letter (or underscore) and
+// with all other characters being letters, underscores, or numbers.
+auto Scanner::ScanIdentifier() -> Token {
+    while (IsAlpha(*_current) || IsDigit(*_current)) {
+        _current++;
+    }
+    switch (*_start) {
+        case 'a': return CheckKeyword(1, 2, "nd", TokenType::AND);
+        case 'c': return CheckKeyword(1, 4, "lass", TokenType::CLASS);
+        case 'e': return CheckKeyword(1, 3, "lse", TokenType::ELSE);
+        case 'f':
+            if (_current - _start > 1) {
+                switch (*(_start + 1)) {
+                    case 'a': return CheckKeyword(2, 3, "lse", TokenType::FALSE);
+                    case 'o': return CheckKeyword(2, 1, "r", TokenType::FOR);
+                    case 'u': return CheckKeyword(2, 1, "n", TokenType::FUN);
+                }
+            }
+            break;
+        case 'i': return CheckKeyword(1, 1, "f", TokenType::IF);
+        case 'n': return CheckKeyword(1, 2, "il", TokenType::NIL);
+        case 'o': return CheckKeyword(1, 1, "r", TokenType::OR);
+        case 'p': return CheckKeyword(1, 4, "rint", TokenType::PRINT);
+        case 'r': return CheckKeyword(1, 5, "eturn", TokenType::RETURN);
+        case 's': return CheckKeyword(1, 4, "uper", TokenType::SUPER);
+        case 't':
+            if (_current - _start > 1) {
+                switch (*(_start + 1)) {
+                    case 'h': return CheckKeyword(2, 2, "is", TokenType::THIS);
+                    case 'r': return CheckKeyword(2, 2, "ue", TokenType::TRUE);
+                }
+            }
+        case 'v': return CheckKeyword(1, 2, "ar", TokenType::VAR);
+        case 'w': return CheckKeyword(1, 4, "hile", TokenType::WHILE);
+    }
+
+    return MakeToken(TokenType::IDENTIFIER);
 }
 
 // Helper method to build a token with `type`.

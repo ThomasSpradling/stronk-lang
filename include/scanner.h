@@ -52,8 +52,13 @@ private:
     auto MakeErrorToken(std::string_view message) -> Token;
 
     auto ScanString() -> Token;
+
     auto IsDigit(char c) -> bool;
     auto ScanNumber() -> Token;
+
+    auto IsAlpha(char c) -> bool;
+    auto CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> Token;
+    auto ScanIdentifier() -> Token;
 public:
     Scanner(const std::string_view source);
     auto ScanToken() -> Token;
