@@ -22,8 +22,13 @@ void Scanner::SkipWhitespace() {
             case '\t':
                 _current++;
                 break;
+            case '\n':
+                _line++;
+                _current++;
+                break;
             case '/':
                 if (*(_current + 1) == '/') {
+                    // Comment goes until end of the line.
                     while (*_current != '\n' && _current != _source.end()) {
                         _current++;
                     }
@@ -43,7 +48,7 @@ auto Scanner::ScanToken() -> Token {
     _start = _current;
 
     if (_current == _source.end()) {
-        return { TokenType::TOKEN_EOF };
+        return MakeToken(TokenType::TOKEN_EOF);
     }
 
     // Get next character and move forward.

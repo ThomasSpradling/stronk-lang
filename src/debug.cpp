@@ -62,7 +62,6 @@ auto DisassembleInstruction(const Chunk &chunk, int offset) -> int {
             return SimpleInstruction("OP_DIVIDE", offset);
         case OP_NEGATE:
             return SimpleInstruction("OP_NEGATE", offset);
-            
         case OP_RETURN:
             return SimpleInstruction("OP_RETURN", offset);
         default:
