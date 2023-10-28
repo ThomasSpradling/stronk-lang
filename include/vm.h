@@ -5,6 +5,7 @@
 #include "chunk.h"
 #include "value.h"
 #include "common.h"
+#include "compiler.h"
 
 #define STACK_MAX 256
 
@@ -21,10 +22,11 @@ private:
     std::stack<Value> stack;
     void __stack_push(Value val);
     Value __stack_pop();
+    Compiler _compiler;
 public:
-    VirtualMachine () {}
+    VirtualMachine();
 
-    InterpretResult interpret(Chunk &chunk);
+    InterpretResult interpret(const std::string source);
     InterpretResult run();
 };
 

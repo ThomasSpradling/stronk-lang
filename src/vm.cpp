@@ -2,6 +2,8 @@
 #include "debug.h"
 #include "vm.h"
 
+VirtualMachine::VirtualMachine() : _compiler(Compiler()) {}
+
 void VirtualMachine::__stack_push(Value val) {
     if (stack.size() >= STACK_MAX) {
         throw std::out_of_range("Stack overflow");
@@ -14,10 +16,13 @@ Value VirtualMachine::__stack_pop() {
     return res;
 }
 
-InterpretResult VirtualMachine::interpret(Chunk &chunk) {
-    _chunk = chunk;
-    ip = _chunk.get_code().begin();
-    return run();
+InterpretResult VirtualMachine::interpret(const std::string source) {
+    _compiler.compile(source);
+    return INTERPRET_OK;
+
+    // _chunk = chunk;
+    // ip = _chunk.get_code().begin();
+    // return run();
 }
 
 // Runs the virtual machine by checking each instruction code.

@@ -1,5 +1,7 @@
 #include <iostream>
 #include <iomanip>
+#include <fstream>
+#include <sstream>
 
 #include "common.h"
 #include "chunk.h"
@@ -11,45 +13,72 @@
 #if COMPUTE_PERF
 #include <chrono>
 using namespace std::chrono;
+
+#define INTERPRET_WITH_PERF(source) \
+    auto start = std::chrono::high_resolution_clock::now(); \
+\
+    InterpretResult result = vm.interpret(source); \
+\
+    auto stop = std::chrono::high_resolution_clock::now(); \
+    auto duration = duration_cast<microseconds>(stop - start); \
+    std::cout << duration.count() / 1000.0 << " ms\n";
 #endif
+
+static void repl(VirtualMachine &vm) {
+    std::string line;
+    for (;;) {
+        std::cout << "> ";
+
+        if (!std::getline(std::cin, line)) {
+            std::cout << "\n";
+            break;
+        }
+
+#if COMPUTE_PERF
+        INTERPRET_WITH_PERF(line)
+#else
+        InterpretResult result = vm.interpret(line);
+#endif
+
+    }
+}
+
+static void run_file(VirtualMachine &vm, std::string path) {
+    // Turn file into a string.
+    std::ifstream istream(path);
+
+    if (!istream.is_open()) {
+        std::cerr << "File does not exist" << "\n";
+        exit(74);
+    }
+    
+    std::stringstream buffer;
+    buffer << istream.rdbuf();
+
+    std::string source = buffer.str();
+
+    // Interpret result and throw errors as necessary.
+#if COMPUTE_PERF
+    INTERPRET_WITH_PERF(source)
+#else
+    InterpretResult result = vm.interpret(source);
+#endif
+
+    if (result == INTERPRET_COMPILE_ERROR) exit(65);
+    if (result == INTERPRET_RUNTIME_ERROR) exit(70);
+}
 
 int main(int argc, const char *argv[]) {
     VirtualMachine vm;
-    Chunk chunk;
 
-    chunk.add_constant_chunk(10, 1);
-    chunk.add_constant_chunk(20, 1);
-
-    for (int i = 0; i < 100000; ++i) {
-        chunk.add_chunk(OP_ADD, 1);
-
-        chunk.add_constant_chunk(5, 1);
-        chunk.add_chunk(OP_SUBTRACT, 1);
-
-        chunk.add_constant_chunk(5, 1);
-        chunk.add_chunk(OP_DIVIDE, 1);
-
-        chunk.add_constant_chunk(2, 1);
-        chunk.add_chunk(OP_MULTIPLY, 1);
-
-        chunk.add_constant_chunk(20, 1);
+    if (argc == 1) {
+        repl(vm);
+    } else if (argc == 2) {
+        run_file(vm, argv[1]);
+    } else {
+        std::cerr << "Usage: stronk [path]\n";
+        exit(64);
     }
-
-    chunk.add_chunk(OP_RETURN, 1);
-
-    disassemble_chunk(chunk, "test chunk");
-
-#if COMPUTE_PERF
-    auto start = std::chrono::high_resolution_clock::now();
-#endif
-
-    vm.interpret(chunk);
-
-#if COMPUTE_PERF
-    auto stop = std::chrono::high_resolution_clock::now();
-    auto duration = duration_cast<microseconds>(stop - start);
-    std::cout << duration.count() / 1000.0 << " ms\n";
-#endif
 
     return 0;
 }
