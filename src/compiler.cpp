@@ -14,6 +14,7 @@ void Compiler::Compile(const std::string_view source) {
         Token token = scanner.ScanToken();
         if (token.line != line) {
             std::cout << std::setw(4) << std::setfill('0') << token.line << ' ';
+            line = token.line;
         } else {
             std::cout << "   | ";
         }

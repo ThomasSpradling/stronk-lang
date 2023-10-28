@@ -9,10 +9,7 @@ auto Scanner::ScanToken() -> Token {
         return { TokenType::TOKEN_EOF };
     }
 
-    std::string error_message = "Unexpected character ";
-    error_message += *_current;
-    error_message += ".";
-    return MakeErrorToken(error_message);
+    return MakeErrorToken("Unexpected character.");
 }
 
 auto Scanner::MakeToken(TokenType type) -> Token {
