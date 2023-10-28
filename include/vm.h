@@ -19,6 +19,8 @@ private:
     Chunk _chunk;
     std::vector<uint8_t>::iterator ip;
     std::stack<Value> stack;
+    void __stack_push(Value val);
+    Value __stack_pop();
 public:
     VirtualMachine () {}
 

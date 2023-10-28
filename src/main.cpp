@@ -20,6 +20,7 @@ int main(int argc, const char *argv[]) {
 
     chunk.add_chunk(OP_NEGATE, 123);
     chunk.add_chunk(OP_RETURN, 123);
+
     disassemble_chunk(chunk, "test chunk");
 
     vm.interpret(chunk);

@@ -2,6 +2,18 @@
 #include "debug.h"
 #include "vm.h"
 
+void VirtualMachine::__stack_push(Value val) {
+    if (stack.size() >= STACK_MAX) {
+        throw std::out_of_range("Stack overflow");
+    }
+    stack.push(val);
+}
+Value VirtualMachine::__stack_pop() {
+    Value res = stack.top();
+    stack.pop();
+    return res;
+}
+
 InterpretResult VirtualMachine::interpret(Chunk &chunk) {
     _chunk = chunk;
     ip = _chunk.get_code().begin();
@@ -13,11 +25,9 @@ InterpretResult VirtualMachine::run() {
 // (TODO) Potentials for dispatching optimizations exist here
 #define BINARY_OP(op) \
     do { \
-        double b = stack.top(); \
-        stack.pop(); \
-        double a = stack.top(); \
-        stack.pop(); \
-        stack.push(a op b); \
+        double b = __stack_pop(); \
+        double a = __stack_pop(); \
+        __stack_push(a op b); \
     } while (false)
 
 
@@ -36,27 +46,24 @@ InterpretResult VirtualMachine::run() {
         switch (instr = *ip++) {
             case OP_CONSTANT:
                 constant = _chunk.get_constant(*ip++);
-                stack.push(constant);
+                __stack_push(constant);
                 break;
             case OP_CONSTANT_LONG:
                 left = *ip++;
                 mid = *ip++;
                 right = *ip++;
                 constant = _chunk.get_constant((left << 16) + (mid << 8) + right);
-                stack.push(constant);
+                __stack_push(constant);
                 break;
             case OP_ADD: BINARY_OP(+); break;
             case OP_SUBTRACT: BINARY_OP(-); break;
             case OP_MULTIPLY: BINARY_OP(*); break;
             case OP_DIVIDE: BINARY_OP(/); break;
             case OP_NEGATE:
-                constant = stack.top();
-                stack.pop();
-                stack.push(-constant);
+                __stack_push(-__stack_pop());
                 break;
             case OP_RETURN:
-                print_value(stack.top());
-                stack.pop();
+                print_value(__stack_pop());
                 std::cout << "\n";
                 return INTERPRET_OK;
             // TODO: add OP_CONST_LONG instruction
