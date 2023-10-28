@@ -22,11 +22,11 @@ InterpretResult VirtualMachine::interpret(Chunk &chunk) {
 
 // Runs the virtual machine by checking each instruction code.
 InterpretResult VirtualMachine::run() {
+
 #define BINARY_OP(op) \
     do { \
         double b = __stack_pop(); \
-        double a = __stack_pop(); \
-        __stack_push(a op b); \
+        stack.top() = stack.top() op b; \
     } while (false)
 
 

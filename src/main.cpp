@@ -17,10 +17,24 @@ int main(int argc, const char *argv[]) {
     VirtualMachine vm;
     Chunk chunk;
 
-    chunk.add_constant_chunk(143, 1);
-    for (int i = 0; i < 1000001; ++i) {
-        chunk.add_chunk(OP_NEGATE, 1);
+    chunk.add_constant_chunk(10, 1);
+    chunk.add_constant_chunk(20, 1);
+
+    for (int i = 0; i < 100000; ++i) {
+        chunk.add_chunk(OP_ADD, 1);
+
+        chunk.add_constant_chunk(5, 1);
+        chunk.add_chunk(OP_SUBTRACT, 1);
+
+        chunk.add_constant_chunk(5, 1);
+        chunk.add_chunk(OP_DIVIDE, 1);
+
+        chunk.add_constant_chunk(2, 1);
+        chunk.add_chunk(OP_MULTIPLY, 1);
+
+        chunk.add_constant_chunk(20, 1);
     }
+
     chunk.add_chunk(OP_RETURN, 1);
 
     disassemble_chunk(chunk, "test chunk");
