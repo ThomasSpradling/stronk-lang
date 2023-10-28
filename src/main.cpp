@@ -26,7 +26,7 @@ using namespace std::chrono;
 
 // Starts reading from standard input as a REPL and
 // compiles + interprets (the bytecode) of each line.
-static void repl(VirtualMachine &vm) {
+static void Repl(VirtualMachine &vm) {
     std::string line;
     for (;;) {
         std::cout << "> ";
@@ -39,15 +39,16 @@ static void repl(VirtualMachine &vm) {
 #if COMPUTE_PERF
         INTERPRET_WITH_PERF(line)
 #else
-        InterpretResult result = vm.interpret(line);
+        InterpretResult result = vm.Interpret(line);
 #endif
-
+        if (result == INTERPRET_COMPILE_ERROR) { exit(65); }
+        if (result == INTERPRET_RUNTIME_ERROR) { exit(70); }
     }
 }
 
 // Reads an entire file and feeds contents to VM to
 // compiler and interpret it.
-static void run_file(VirtualMachine &vm, std::string path) {
+static void RunFile(VirtualMachine &vm, std::string_view path) {
     // Turn file into a string.
     std::ifstream istream(path);
 
@@ -65,20 +66,20 @@ static void run_file(VirtualMachine &vm, std::string path) {
 #if COMPUTE_PERF
     INTERPRET_WITH_PERF(source)
 #else
-    InterpretResult result = vm.interpret(source);
+    InterpretResult result = vm.Interpret(source);
 #endif
 
-    if (result == INTERPRET_COMPILE_ERROR) exit(65);
-    if (result == INTERPRET_RUNTIME_ERROR) exit(70);
+    if (result == INTERPRET_COMPILE_ERROR) { exit(65); }
+    if (result == INTERPRET_RUNTIME_ERROR) { exit(70); }
 }
 
-int main(int argc, const char *argv[]) {
+auto main(int argc, const char *argv[]) -> int {
     VirtualMachine vm;
 
     if (argc == 1) {
-        repl(vm);
+        Repl(vm);
     } else if (argc == 2) {
-        run_file(vm, argv[1]);
+        RunFile(vm, argv[1]);
     } else {
         std::cerr << "Usage: stronk [path]\n";
         exit(64);

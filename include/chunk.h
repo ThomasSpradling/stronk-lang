@@ -24,19 +24,19 @@ private:
     // Utilizing run-length encoding: https://en.wikipedia.org/wiki/Run-length_encoding
     std::vector<std::pair<int, int>> lines;
 public:
-    void add_chunk(uint8_t item, int line);
-    auto add_constant(Value val) -> int;
-    void add_constant_chunk(Value val, int line);
-    auto get_chunk(int offset) const -> uint8_t;
-    auto get_line(int offset) const -> int;
-    auto get_constant(int constant) const -> Value;
+    void AddChunk(uint8_t item, int line);
+    auto AddConstant(Value val) -> int;
+    void AddConstantChunk(Value val, int line);
+    auto GetChunk(int offset) const -> uint8_t;
+    auto GetLine(int offset) const -> int;
+    auto GetConstant(int constant) const -> Value;
 
-    auto size() const -> size_t;
+    auto Size() const -> size_t;
     
-    auto get_code() -> std::vector<uint8_t> & {
+    auto GetCode() -> std::vector<uint8_t> & {
         return code;
     }
-    auto get_constants() -> ValueArray & {
+    auto GetConstants() -> ValueArray & {
         return constants;
     }
 };

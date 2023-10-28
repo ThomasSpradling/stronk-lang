@@ -4,7 +4,7 @@
 #include "value.h"
 
 // Prints an instruction that only has an associated name.
-auto __simple_instruction(std::string name, int offset) -> int {
+auto SimpleInstruction(std::string_view name, int offset) -> int {
     std::cout << name << "\n";
     return offset + 1;
 }
@@ -12,10 +12,10 @@ auto __simple_instruction(std::string name, int offset) -> int {
 // Prints the an instruction and the following bytecode part.
 // Best suitable for OP_CONSTANT which take up two
 // bytecodes to form.
-auto __constant_instruction(std::string name, const Chunk &chunk, int offset) -> int {
-    int constant = chunk.get_chunk(offset + 1);
+auto ConstantInstruction(std::string_view name, const Chunk &chunk, int offset) -> int {
+    int constant = chunk.GetChunk(offset + 1);
     std::cout << std::left << std::setw(16) << std::setfill(' ') << name << std::right << std::setw(3) << std::setfill('0') << constant << " '";
-    print_value(chunk.get_constant(constant));
+    PrintValue(chunk.GetConstant(constant));
     std::cout << "'\n";
     return offset + 2;
 }
@@ -23,48 +23,48 @@ auto __constant_instruction(std::string name, const Chunk &chunk, int offset) ->
 // Prints an instruction along with the next three bytecodes.
 // Best suitable for OP_CONSTANT_LONG which takes up four
 // bytecodes to form.
-auto __constant_long_instruction(std::string name, const Chunk &chunk, int offset) -> int {
-    int left = chunk.get_chunk(offset + 1);
-    int mid = chunk.get_chunk(offset + 2);
-    int right = chunk.get_chunk(offset + 3);
+auto ConstantLongInstruction(std::string_view name, const Chunk &chunk, int offset) -> int {
+    int left = chunk.GetChunk(offset + 1);
+    int mid = chunk.GetChunk(offset + 2);
+    int right = chunk.GetChunk(offset + 3);
     int constant = (left << 16) + (mid << 8) + right;
     std::cout << std::left << std::setw(21) << std::setfill(' ') << name << std::right << std::setw(8) << std::setfill('0') << constant << " '";
-    print_value(chunk.get_constant(constant));
+    PrintValue(chunk.GetConstant(constant));
     std::cout << "'\n";
     return offset + 4;
 }
 
 // Prints a single instruction (as given by offset) in a
 // human-friendly format.
-auto disassemble_instruction(const Chunk &chunk, int offset) -> int {
+auto DisassembleInstruction(const Chunk &chunk, int offset) -> int {
     std::cout << std::setw(4) << std::setfill('0') << offset << " ";
 
-    if (offset > 0 && chunk.get_line(offset) == chunk.get_line(offset - 1)) {
+    if (offset > 0 && chunk.GetLine(offset) == chunk.GetLine(offset - 1)) {
         std::cout << "   | ";
     } else {
-        std::cout << std::setw(4) << chunk.get_line(offset) << " ";
+        std::cout << std::setw(4) << chunk.GetLine(offset) << " ";
     }
 
-    uint8_t instr = chunk.get_chunk(offset);
+    uint8_t instr = chunk.GetChunk(offset);
 
     switch (instr) {
         case OP_CONSTANT:
-            return __constant_instruction("OP_CONSTANT", chunk, offset);
+            return ConstantInstruction("OP_CONSTANT", chunk, offset);
         case OP_CONSTANT_LONG:
-            return __constant_long_instruction("OP_CONSTANT_LONG", chunk, offset);
+            return ConstantLongInstruction("OP_CONSTANT_LONG", chunk, offset);
         case OP_ADD:
-            return __simple_instruction("OP_ADD", offset);
+            return SimpleInstruction("OP_ADD", offset);
         case OP_SUBTRACT:
-            return __simple_instruction("OP_SUBTRACT", offset);
+            return SimpleInstruction("OP_SUBTRACT", offset);
         case OP_MULTIPLY:
-            return __simple_instruction("OP_MULTIPLY", offset);
+            return SimpleInstruction("OP_MULTIPLY", offset);
         case OP_DIVIDE:
-            return __simple_instruction("OP_DIVIDE", offset);
+            return SimpleInstruction("OP_DIVIDE", offset);
         case OP_NEGATE:
-            return __simple_instruction("OP_NEGATE", offset);
+            return SimpleInstruction("OP_NEGATE", offset);
             
         case OP_RETURN:
-            return __simple_instruction("OP_RETURN", offset);
+            return SimpleInstruction("OP_RETURN", offset);
         default:
             std::cout << "Unknown opcode " << instr;
             return offset + 1;
@@ -73,17 +73,17 @@ auto disassemble_instruction(const Chunk &chunk, int offset) -> int {
 
 // Prints an entire chunk of instructions in a human-friendly
 // format.
-void disassemble_chunk(const Chunk &chunk, std::string_view name) {
+void DisassembleChunk(const Chunk &chunk, std::string_view name) {
     std::cout << "== " << name << " ==\n";
 
-    for (int offset = 0; offset < chunk.size();) {
-        offset = disassemble_instruction(chunk, offset);
+    for (int offset = 0; offset < chunk.Size();) {
+        offset = DisassembleInstruction(chunk, offset);
     }
 }
 
 // Prints a stack of Values. Best used for printing the VM stack
 // in a human-friendly way.
-void print_stack(std::stack<Value> &stack) {
+void PrintStack(std::stack<Value> &stack) {
     std::cout << "          ";
     if (stack.empty()) {
         std::cout << "<empty stack>" << "\n";
@@ -92,7 +92,7 @@ void print_stack(std::stack<Value> &stack) {
     std::stack<Value> temp = stack;
     while (!temp.empty()) {
         std::cout << "[ ";
-        print_value(temp.top());
+        PrintValue(temp.top());
         std::cout << " ]";
         temp.pop();
     }

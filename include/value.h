@@ -7,6 +7,6 @@
 using Value = double;
 using ValueArray = std::vector<Value>;
 
-void print_value(Value val);
+void PrintValue(Value val);
 
 #endif // _STRONK_VALUE_H

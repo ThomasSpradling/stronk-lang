@@ -8,7 +8,7 @@
 class Compiler {
 public:
     Compiler();
-    void compile(const std::string source);
+    void Compile(const std::string_view source);
 };
 
 #endif // _STRONK_COMPILER_H

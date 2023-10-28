@@ -2,10 +2,8 @@
 #include "debug.h"
 #include "vm.h"
 
-VirtualMachine::VirtualMachine() : _compiler(Compiler()) {}
-
 // Utility method for adding to VM stack.
-void VirtualMachine::__stack_push(Value val) {
+void VirtualMachine::StackPush(Value val) {
     if (stack.size() >= STACK_MAX) {
         throw std::out_of_range("Stack overflow");
     }
@@ -13,15 +11,15 @@ void VirtualMachine::__stack_push(Value val) {
 }
 
 // Utility method for popping from VM stack.
-Value VirtualMachine::__stack_pop() {
+auto VirtualMachine::StackPop() -> Value {
     Value res = stack.top();
     stack.pop();
     return res;
 }
 
 // Interprets the compiled source.
-InterpretResult VirtualMachine::interpret(const std::string source) {
-    _compiler.compile(source);
+auto VirtualMachine::Interpret(const std::string_view source) -> InterpretResult {
+    _compiler.Compile(source);
     return INTERPRET_OK;
 
     // _chunk = chunk;
@@ -30,12 +28,12 @@ InterpretResult VirtualMachine::interpret(const std::string source) {
 }
 
 // Runs the virtual machine by checking each instruction code.
-InterpretResult VirtualMachine::run() {
+auto VirtualMachine::Run() -> InterpretResult {
 
 // Messy hack to make same task simpler.
 #define BINARY_OP(op) \
     do { \
-        double b = __stack_pop(); \
+        double b = StackPop(); \
         stack.top() = stack.top() op b; \
     } while (false)
 
@@ -49,20 +47,22 @@ InterpretResult VirtualMachine::run() {
 #endif
         // uint8_t instr;
         Value constant;
-        int left, mid, right;
+        int left;
+        int mid;
+        int right;
 
         // Read a byte from _chunk, which ip points to.
         switch (*ip++) {
             case OP_CONSTANT:
-                constant = _chunk.get_constant(*ip++);
-                __stack_push(constant);
+                constant = _chunk.GetConstant(*ip++);
+                StackPush(constant);
                 break;
             case OP_CONSTANT_LONG:
                 left = *ip++;
                 mid = *ip++;
                 right = *ip++;
-                constant = _chunk.get_constant((left << 16) + (mid << 8) + right);
-                __stack_push(constant);
+                constant = _chunk.GetConstant((left << 16) + (mid << 8) + right);
+                StackPush(constant);
                 break;
             case OP_ADD: BINARY_OP(+); break;
             case OP_SUBTRACT: BINARY_OP(-); break;
@@ -72,7 +72,7 @@ InterpretResult VirtualMachine::run() {
                 stack.top() *= -1;
                 break;
             case OP_RETURN:
-                print_value(__stack_pop());
+                PrintValue(StackPop());
                 std::cout << "\n";
                 return INTERPRET_OK;
         }

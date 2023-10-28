@@ -22,14 +22,14 @@ private:
     Chunk _chunk;
     std::vector<uint8_t>::iterator ip;
     std::stack<Value> stack;
-    void __stack_push(Value val);
-    Value __stack_pop();
+    void StackPush(Value val);
+    auto StackPop() -> Value;
     Compiler _compiler;
 public:
-    VirtualMachine();
+    VirtualMachine() {};
 
-    InterpretResult interpret(const std::string source);
-    InterpretResult run();
+    auto Interpret(const std::string_view source) -> InterpretResult;
+    auto Run() -> InterpretResult;
 };
 
 

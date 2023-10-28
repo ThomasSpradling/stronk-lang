@@ -7,11 +7,11 @@
 // compiling.
 class Scanner {
 private:
-    std::string::iterator _start;
-    std::string::iterator _current;
+    std::string_view::iterator _start;
+    std::string_view::iterator _current;
     int _line;
 public:
-    Scanner(std::string source);
+    Scanner(const std::string_view source);
 };
 
 #endif // _STRONK_SCANNER_H
