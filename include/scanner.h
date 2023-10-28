@@ -47,7 +47,13 @@ private:
     std::string_view::iterator _current;
     int _line;
     auto MakeToken(TokenType type) -> Token;
+    auto MatchChar(char to_match) -> bool;
+    void SkipWhitespace();
     auto MakeErrorToken(std::string_view message) -> Token;
+
+    auto ScanString() -> Token;
+    auto IsDigit(char c) -> bool;
+    auto ScanNumber() -> Token;
 public:
     Scanner(const std::string_view source);
     auto ScanToken() -> Token;
