@@ -58,3 +58,19 @@ void disassemble_chunk(const Chunk &chunk, std::string_view name) {
         offset = disassemble_instruction(chunk, offset);
     }
 }
+
+void print_stack(std::stack<Value> &stack) {
+    std::cout << "          ";
+    if (stack.empty()) {
+        std::cout << "<empty stack>" << "\n";
+        return;
+    }
+    std::stack<Value> temp = stack;
+    while (!temp.empty()) {
+        std::cout << "[ ";
+        print_value(temp.top());
+        std::cout << " ]";
+        temp.pop();
+    }
+    std::cout << "\n";
+}

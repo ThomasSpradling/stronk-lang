@@ -10,9 +10,10 @@ int main(int argc, const char *argv[]) {
     VirtualMachine vm;
     Chunk chunk;
 
-    chunk.add_constant_chunk(53, 1);
-    chunk.add_constant_chunk(23, 2);
-    chunk.add_constant_chunk(1012, 3);
+    for (int i = 0; i < 300; i++) {
+        chunk.add_constant_chunk(2 * i, i);
+    }
+    chunk.add_constant_chunk(23992, 1000);
     
     chunk.add_chunk(OP_RETURN, 2);
     disassemble_chunk(chunk, "test chunk");
@@ -20,12 +21,4 @@ int main(int argc, const char *argv[]) {
     vm.interpret(chunk);
 
     return 0;
-
-    // std::vector<uint8_t> vec { 1, 2, 3, 4 };
-
-    // std::vector<uint8_t>::iterator ip = vec.begin();
-
-    // for (; ip != vec.end(); ip++) {
-    //     std::cout << "entry of arr: " << int(*ip) << "\n";
-    // }
 }

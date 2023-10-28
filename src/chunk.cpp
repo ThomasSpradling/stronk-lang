@@ -1,4 +1,5 @@
 #include "chunk.h"
+#include <iostream>
 
 void Chunk::add_chunk(uint8_t item, int line) {
     code.push_back(item);
@@ -52,7 +53,7 @@ auto Chunk::get_line(int offset) const -> int {
     }
     return -1;
 }
-auto Chunk::get_constant(uint8_t constant) const -> Value {
+auto Chunk::get_constant(int constant) const -> Value {
     if (constant < 0 || constant >= constants.size()) {
         throw "Out of bound constant";
     }

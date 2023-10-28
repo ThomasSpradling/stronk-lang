@@ -24,7 +24,7 @@ public:
     void add_constant_chunk(Value val, int line);
     auto get_chunk(int offset) const -> uint8_t;
     auto get_line(int offset) const -> int;
-    auto get_constant(uint8_t constant) const -> Value;
+    auto get_constant(int constant) const -> Value;
 
     auto size() const -> size_t;
     
