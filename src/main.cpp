@@ -10,12 +10,16 @@ int main(int argc, const char *argv[]) {
     VirtualMachine vm;
     Chunk chunk;
 
-    for (int i = 0; i < 300; i++) {
-        chunk.add_constant_chunk(2 * i, i);
-    }
-    chunk.add_constant_chunk(23992, 1000);
-    
-    chunk.add_chunk(OP_RETURN, 2);
+    chunk.add_constant_chunk(1.2, 123);
+    chunk.add_constant_chunk(3.4, 123);
+    chunk.add_chunk(OP_ADD, 123);
+
+    chunk.add_constant_chunk(5.6, 123);
+
+    chunk.add_chunk(OP_DIVIDE, 123);
+
+    chunk.add_chunk(OP_NEGATE, 123);
+    chunk.add_chunk(OP_RETURN, 123);
     disassemble_chunk(chunk, "test chunk");
 
     vm.interpret(chunk);

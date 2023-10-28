@@ -11,6 +11,15 @@ InterpretResult VirtualMachine::interpret(Chunk &chunk) {
 // Runs the virtual machine by checking each instruction code.
 InterpretResult VirtualMachine::run() {
 // (TODO) Potentials for dispatching optimizations exist here
+#define BINARY_OP(op) \
+    do { \
+        double b = stack.top(); \
+        stack.pop(); \
+        double a = stack.top(); \
+        stack.pop(); \
+        stack.push(a op b); \
+    } while (false)
+
 
     for (;;) {
 #ifdef DEBUG_TRACE_EXECUTION
@@ -21,26 +30,37 @@ InterpretResult VirtualMachine::run() {
 #endif
         uint8_t instr;
         Value constant;
+        int left, mid, right;
 
         // Read a byte from _chunk, which ip points to.
         switch (instr = *ip++) {
-            case OP_RETURN:
-                print_value(stack.top());
-                stack.pop();
-                std::cout << "\n";
-                return INTERPRET_OK;
             case OP_CONSTANT:
                 constant = _chunk.get_constant(*ip++);
                 stack.push(constant);
                 break;
             case OP_CONSTANT_LONG:
-                int left = *ip++;
-                int mid = *ip++;
-                int right = *ip++;
+                left = *ip++;
+                mid = *ip++;
+                right = *ip++;
                 constant = _chunk.get_constant((left << 16) + (mid << 8) + right);
                 stack.push(constant);
                 break;
+            case OP_ADD: BINARY_OP(+); break;
+            case OP_SUBTRACT: BINARY_OP(-); break;
+            case OP_MULTIPLY: BINARY_OP(*); break;
+            case OP_DIVIDE: BINARY_OP(/); break;
+            case OP_NEGATE:
+                constant = stack.top();
+                stack.pop();
+                stack.push(-constant);
+                break;
+            case OP_RETURN:
+                print_value(stack.top());
+                stack.pop();
+                std::cout << "\n";
+                return INTERPRET_OK;
             // TODO: add OP_CONST_LONG instruction
         }
     }
+#undef BINARY_OP
 }
