@@ -22,7 +22,6 @@ InterpretResult VirtualMachine::interpret(Chunk &chunk) {
 
 // Runs the virtual machine by checking each instruction code.
 InterpretResult VirtualMachine::run() {
-// (TODO) Potentials for dispatching optimizations exist here
 #define BINARY_OP(op) \
     do { \
         double b = __stack_pop(); \
@@ -32,7 +31,7 @@ InterpretResult VirtualMachine::run() {
 
 
     for (;;) {
-#ifdef DEBUG_TRACE_EXECUTION
+#if DEBUG_TRACE_EXECUTION
         print_stack(stack);
 
         int offset = std::distance(_chunk.get_code().begin(), ip);
@@ -60,13 +59,12 @@ InterpretResult VirtualMachine::run() {
             case OP_MULTIPLY: BINARY_OP(*); break;
             case OP_DIVIDE: BINARY_OP(/); break;
             case OP_NEGATE:
-                __stack_push(-__stack_pop());
+                stack.top() *= -1;
                 break;
             case OP_RETURN:
                 print_value(__stack_pop());
                 std::cout << "\n";
                 return INTERPRET_OK;
-            // TODO: add OP_CONST_LONG instruction
         }
     }
 #undef BINARY_OP

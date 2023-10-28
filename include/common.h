@@ -1,6 +1,6 @@
 #ifndef _STRONK_COMMON_H
 #define _STRONK_COMMON_H
 
-// #define DEBUG_TRACE_EXECUTION
+#define DEBUG_TRACE_EXECUTION 0
 
 #endif // _STRONK_COMMON_H
