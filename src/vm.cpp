@@ -1,8 +1,9 @@
 #include <iostream>
 #include "debug.h"
 #include "vm.h"
+#include "compiler.h"
 
-VirtualMachine::VirtualMachine(const std::string_view source) : _compiler(source) {};
+VirtualMachine::VirtualMachine(const std::string_view source) : _compiler(new Compiler(this, source)) {};
 
 // Utility method for adding to VM stack.
 void VirtualMachine::StackPush(Value val) {
@@ -23,7 +24,7 @@ auto VirtualMachine::StackPop() -> Value {
 auto VirtualMachine::Interpret() -> InterpretResult {
     Chunk chunk;
 
-    if (!_compiler.Compile(chunk)) {
+    if (!_compiler->Compile(chunk)) {
         return INTERPRET_COMPILE_ERROR;
     }
 

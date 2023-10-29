@@ -1,8 +1,9 @@
 #include <iomanip>
 #include <iostream>
 #include "compiler.h"
+#include "vm.h"
 
-Compiler::Compiler(const std::string_view source) : _scanner(source) {};
+Compiler::Compiler(VirtualMachine *vm, const std::string_view source) : vm(vm), _scanner(source) {};
 
 // Grabs next non-error token. Returns false if
 // an error occurs and true otherwise.

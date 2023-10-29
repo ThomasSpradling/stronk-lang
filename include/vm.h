@@ -5,9 +5,10 @@
 #include "chunk.h"
 #include "value.h"
 #include "common.h"
-#include "compiler.h"
 
 #define STACK_MAX 256
+
+class Compiler;
 
 enum InterpretResult {
     INTERPRET_OK,
@@ -24,14 +25,12 @@ private:
     std::stack<Value> stack;
     void StackPush(Value val);
     auto StackPop() -> Value;
-    Compiler _compiler;
+    Compiler *_compiler;
 public:
     VirtualMachine(const std::string_view source);
 
     auto Interpret() -> InterpretResult;
     auto Run() -> InterpretResult;
 };
-
-
 
 #endif // _STRONK_VM_H

@@ -6,6 +6,8 @@
 #include "common.h"
 #include "scanner.h"
 
+class VirtualMachine;
+
 // Compiles tokens provided by Scanner into
 // bytecode.
 class Compiler {
@@ -15,12 +17,13 @@ private:
     Token previous;
     bool error_occurred = false;
     bool is_panic_mode = false; // Prevents cascade errors.
+    VirtualMachine *vm;
 
     void StepForward();
     void StepIfMatch(TokenType type, std::string_view message);
     void ErrorAt(Token &token, std::string_view message);
 public:
-    Compiler(const std::string_view source);
+    Compiler(VirtualMachine *vm, const std::string_view source);
     auto Compile(Chunk &chunk) -> bool;
 };
 
