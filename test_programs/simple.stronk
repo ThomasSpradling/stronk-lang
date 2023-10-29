@@ -1,1 +1,25 @@
-printfoo
+
+/* This is a  /* nested */ comment */
+
+
+/* This is a comment // okay */
+
+////// ///// //// another comment
+
+// simple comment
+
+// another /* simple */ comment
+
+/* This is a comment */
+
+
+/* This is a comment */
+
+
+/* This is a comment */
+print "hello"; /* This is /* a very /* nested */ */ comment */ print "goodbye";
+
+
+/* This is a comment */
+
+/* This is a comment */

@@ -33,6 +33,25 @@ void Scanner::SkipWhitespace() {
                     while (*_current != '\n' && _current != _source.end()) {
                         _current++;
                     }
+                } else if (*(_current + 1) == '*') {
+                    // Multiline comment
+                    _current += 1;
+                    int depth = 1; // Keep track of depth of nested comment
+                    while (_current != _source.end()) {
+                        if (depth == 0) {
+                            _current++;
+                            break;
+                        }
+                        _current++;
+                        if (*_current == '/' && *(_current + 1) == '*') {
+                            _current++;
+                            depth++;
+                        }
+                        if (*_current == '*' && *(_current + 1) == '/') {
+                            _current++;
+                            depth--;
+                        }
+                    }
                 } else {
                     return;
                 }
