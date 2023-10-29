@@ -2,7 +2,7 @@
 #include <iostream>
 #include "compiler.h"
 
-Compiler::Compiler(const std::string_view source) : _scanner(source) {};
+Compiler::Compiler(const std::string_view source, Chunk &chunk) : _scanner(source), current_chunk(chunk) {};
 
 // Grabs next non-error token. Returns false if
 // an error occurs and true otherwise.
@@ -50,14 +50,19 @@ void Compiler::ErrorAt(Token &token, std::string_view message) {
     error_occurred = true;
 }
 
+// Turns a number token into bytecode.
+void Compiler::ParseNumber() {
+    double value = std::stod(previous.start, nullptr);
+    if (!current_chunk.AddConstantChunk(value, previous.line)) {
+        ErrorAt(previous, "Too many constants in one chunk!");
+    }
+}
+
 // Compiles the source after scanning it.
-auto Compiler::Compile(Chunk &chunk) -> bool {
-    current_chunk = chunk;
-
-    StepForward();
-    StepIfMatch(TokenType::TOKEN_EOF, "Expect end of expression.");
-
+auto Compiler::Compile() -> bool {
     // End with return.
+    StepForward();
+    StepIfMatch(TokenType::TOKEN_EOF, "Expected end of expression.");
     current_chunk.AddChunk(OpCode::OP_RETURN, previous.line);
     return !error_occurred;
 }

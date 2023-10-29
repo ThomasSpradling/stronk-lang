@@ -42,6 +42,9 @@ void Scanner::SkipWhitespace() {
                             _current++;
                             break;
                         }
+                        if (*_current == '\n') {
+                            _line++;
+                        }
                         _current++;
                         if (*_current == '/' && *(_current + 1) == '*') {
                             _current++;

@@ -3,7 +3,7 @@
 #include "debug.h"
 #include "vm.h"
 
-VirtualMachine::VirtualMachine(const std::string_view source) : _compiler(source) {};
+VirtualMachine::VirtualMachine(const std::string_view source) : _compiler(source, _chunk) {};
 
 // Utility method for adding to VM stack.
 void VirtualMachine::StackPush(Value val) {
@@ -22,13 +22,11 @@ auto VirtualMachine::StackPop() -> Value {
 
 // Interprets the compiled source.
 auto VirtualMachine::Interpret() -> InterpretResult {
-    Chunk chunk;
 
-    if (!_compiler.Compile(chunk)) {
+    if (!_compiler.Compile()) {
         return INTERPRET_COMPILE_ERROR;
     }
 
-    _chunk = chunk;
     ip = _chunk.GetCode().begin();
     return Run();
 }

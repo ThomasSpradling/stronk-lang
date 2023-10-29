@@ -26,7 +26,7 @@ private:
 public:
     void AddChunk(uint8_t item, int line);
     auto AddConstant(Value val) -> int;
-    void AddConstantChunk(Value val, int line);
+    auto AddConstantChunk(Value val, int line) -> bool;
     auto GetChunk(int offset) const -> uint8_t;
     auto GetLine(int offset) const -> int;
     auto GetConstant(int constant) const -> Value;

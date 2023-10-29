@@ -20,13 +20,14 @@ auto Chunk::AddConstant(Value val) -> int {
 
 // A utility method for adding a constant instruction.
 // It (1) adds `val` to the constant pool and (2) adds
-// the produced index to the chunk.
-void Chunk::AddConstantChunk(Value val, int line) {
-    if (constants.size() < 256) {
+// the produced index to the chunk. Returns error (false)
+// iff there are at least 2^25 constants.
+auto Chunk::AddConstantChunk(Value val, int line) -> bool {
+    if (constants.size() <= UINT8_MAX) {
        int constant = AddConstant(val);
        AddChunk(OP_CONSTANT, line);
        AddChunk(constant, line);
-    } else if (constants.size() < (1 << 25) - 1) {
+    } else if (constants.size() <= (1 << 25) - 1) {
         // Handle for large number of constants
         int constant = AddConstant(val);
 
@@ -35,8 +36,9 @@ void Chunk::AddConstantChunk(Value val, int line) {
         AddChunk((constant >> 8) & 0xFF, line);
         AddChunk(constant & 0xFF, line);
     } else {
-        throw "Constant pool overflow!";
+        return false;
     }
+    return true;
 }
 
 // Gets an instruction from the chunk at `offset`.
