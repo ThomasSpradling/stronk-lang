@@ -2,6 +2,8 @@
 #include "debug.h"
 #include "vm.h"
 
+VirtualMachine::VirtualMachine(const std::string_view source) : _compiler(source) {};
+
 // Utility method for adding to VM stack.
 void VirtualMachine::StackPush(Value val) {
     if (stack.size() >= STACK_MAX) {
@@ -18,13 +20,16 @@ auto VirtualMachine::StackPop() -> Value {
 }
 
 // Interprets the compiled source.
-auto VirtualMachine::Interpret(const std::string_view source) -> InterpretResult {
-    _compiler.Compile(source);
-    return INTERPRET_OK;
+auto VirtualMachine::Interpret() -> InterpretResult {
+    Chunk chunk;
 
-    // _chunk = chunk;
-    // ip = _chunk.get_code().begin();
-    // return run();
+    if (!_compiler.Compile(chunk)) {
+        return INTERPRET_COMPILE_ERROR;
+    }
+
+    _chunk = chunk;
+    ip = _chunk.GetCode().begin();
+    return Run();
 }
 
 // Runs the virtual machine by checking each instruction code.

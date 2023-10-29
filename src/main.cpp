@@ -14,10 +14,10 @@
 #include <chrono>
 using namespace std::chrono;
 
-#define INTERPRET_WITH_PERF(source) \
+#define INTERPRET_WITH_PERF() \
     auto start = std::chrono::high_resolution_clock::now(); \
 \
-    InterpretResult result = vm.interpret(source); \
+    InterpretResult result = vm.interpret(); \
 \
     auto stop = std::chrono::high_resolution_clock::now(); \
     auto duration = duration_cast<microseconds>(stop - start); \
@@ -26,7 +26,7 @@ using namespace std::chrono;
 
 // Starts reading from standard input as a REPL and
 // compiles + interprets (the bytecode) of each line.
-static void Repl(VirtualMachine &vm) {
+static void Repl() {
     std::string line;
     for (;;) {
         std::cout << "> ";
@@ -36,10 +36,12 @@ static void Repl(VirtualMachine &vm) {
             break;
         }
 
+         VirtualMachine vm(line);
+
 #if COMPUTE_PERF
-        INTERPRET_WITH_PERF(line)
+        INTERPRET_WITH_PERF()
 #else
-        InterpretResult result = vm.Interpret(line);
+        InterpretResult result = vm.Interpret();
 #endif
         if (result == INTERPRET_COMPILE_ERROR) { exit(65); }
         if (result == INTERPRET_RUNTIME_ERROR) { exit(70); }
@@ -48,7 +50,7 @@ static void Repl(VirtualMachine &vm) {
 
 // Reads an entire file and feeds contents to VM to
 // compiler and interpret it.
-static void RunFile(VirtualMachine &vm, std::string_view path) {
+static void RunFile(std::string_view path) {
     // Turn file into a string.
     std::ifstream istream(path);
 
@@ -62,11 +64,13 @@ static void RunFile(VirtualMachine &vm, std::string_view path) {
 
     std::string source = buffer.str();
 
+    VirtualMachine vm(source);
+
     // Interpret result and throw errors as necessary.
 #if COMPUTE_PERF
-    INTERPRET_WITH_PERF(source)
+    INTERPRET_WITH_PERF()
 #else
-    InterpretResult result = vm.Interpret(source);
+    InterpretResult result = vm.Interpret();
 #endif
 
     if (result == INTERPRET_COMPILE_ERROR) { exit(65); }
@@ -74,12 +78,10 @@ static void RunFile(VirtualMachine &vm, std::string_view path) {
 }
 
 auto main(int argc, const char *argv[]) -> int {
-    VirtualMachine vm;
-
     if (argc == 1) {
-        Repl(vm);
+        Repl();
     } else if (argc == 2) {
-        RunFile(vm, argv[1]);
+        RunFile(argv[1]);
     } else {
         std::cerr << "Usage: stronk [path]\n";
         exit(64);

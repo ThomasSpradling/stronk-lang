@@ -1,5 +1,5 @@
-#include "chunk.h"
 #include <iostream>
+#include "chunk.h"
 
 // Adds an instruction to the chunk at line number `line`.
 void Chunk::AddChunk(uint8_t item, int line) {

@@ -26,9 +26,9 @@ private:
     auto StackPop() -> Value;
     Compiler _compiler;
 public:
-    VirtualMachine() {};
+    VirtualMachine(const std::string_view source);
 
-    auto Interpret(const std::string_view source) -> InterpretResult;
+    auto Interpret() -> InterpretResult;
     auto Run() -> InterpretResult;
 };
 
