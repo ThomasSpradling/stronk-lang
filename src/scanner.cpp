@@ -1,3 +1,4 @@
+#include <iostream>
 #include "scanner.h"
 
 Scanner::Scanner(const std::string_view source) : _start(source.begin()), _current(source.begin()), _source(source) {}
@@ -44,7 +45,10 @@ void Scanner::SkipWhitespace() {
 
 // Scans a single token from the input source.
 auto Scanner::ScanToken() -> Token {
-    SkipWhitespace();
+    // String mode should leave whitespace alone.
+    if (mode != ScannerMode::MODE_STRING) {
+        SkipWhitespace();
+    }
     _start = _current;
 
     if (_current == _source.end()) {
@@ -114,6 +118,10 @@ auto Scanner::ScanString() -> Token {
         char c = *_current++;
 
         switch (c) {
+            case '\\':
+                // Escaped characters are their own tokens.
+                _current++;
+                return MakeToken(TokenType::ESCAPED);
             case '"':
                 mode = ScannerMode::MODE_NORMAL;
                 str_depth--;
@@ -127,8 +135,8 @@ auto Scanner::ScanString() -> Token {
                 _line++;
                 break;
             default:
-                // If the next characters will cause us to leave string mode, return text.
-                if (_current == _source.end() || *_current == '"') {
+                // If the next characters us to cut string.
+                if (_current == _source.end() || *_current == '"' || *_current  == '\\') {
                     return MakeToken(TokenType::STRING);
                 }
                 if (_current + 1 == _source.end() || *_current == '$' && *(_current + 1) == '{') {
