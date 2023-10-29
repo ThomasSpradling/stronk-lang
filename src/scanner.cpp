@@ -48,6 +48,10 @@ auto Scanner::ScanToken() -> Token {
     _start = _current;
 
     if (_current == _source.end()) {
+        if (str_depth != 0) {
+            str_depth = 0;
+            return MakeErrorToken("Unterminated string.");
+        }
         return MakeToken(TokenType::TOKEN_EOF);
     }
 
