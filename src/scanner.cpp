@@ -178,7 +178,7 @@ auto Scanner::IsAlpha(char c) -> bool {
 auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> Token {
     std::string_view::iterator start_iter = _start + start;
     std::string_view view(start_iter, length);
-    if (view == rest) {
+    if (_current - _start == start + length && view == rest) {
         return MakeToken(type);
     }
 
