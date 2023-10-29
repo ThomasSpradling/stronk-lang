@@ -1,9 +1,8 @@
 #include <iomanip>
 #include <iostream>
 #include "compiler.h"
-#include "vm.h"
 
-Compiler::Compiler(VirtualMachine *vm, const std::string_view source) : vm(vm), _scanner(source) {};
+Compiler::Compiler(const std::string_view source) : _scanner(source) {};
 
 // Grabs next non-error token. Returns false if
 // an error occurs and true otherwise.
@@ -53,7 +52,12 @@ void Compiler::ErrorAt(Token &token, std::string_view message) {
 
 // Compiles the source after scanning it.
 auto Compiler::Compile(Chunk &chunk) -> bool {
+    current_chunk = chunk;
+
     StepForward();
     StepIfMatch(TokenType::TOKEN_EOF, "Expect end of expression.");
+
+    // End with return.
+    current_chunk.AddChunk(OpCode::OP_RETURN, previous.line);
     return !error_occurred;
 }
