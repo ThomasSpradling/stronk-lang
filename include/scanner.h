@@ -10,11 +10,13 @@ enum TokenType {
     COMMA, DOT,
     MINUS, PLUS,
     SEMICOLON, SLASH, STAR,
+    QUOTE,
 
     BANG, BANG_EQUAL,
     EQUAL, EQUAL_EQUAL,
     GREATER, GREATER_EQUAL,
     LESS, LESS_EQUAL,
+    DOLLAR_BRACE,
 
     // Literals
     IDENTIFIER, STRING, NUMBER,
@@ -38,6 +40,11 @@ struct Token {
     int line;
 };
 
+enum ScannerMode {
+    MODE_NORMAL,
+    MODE_STRING
+};
+
 // Lexical analysis over the source to allow for
 // compiling.
 class Scanner {
@@ -45,7 +52,10 @@ private:
     std::string_view _source;
     std::string_view::iterator _start;
     std::string_view::iterator _current;
-    int _line;
+    ScannerMode mode = ScannerMode::MODE_NORMAL;
+    int str_depth = 0;
+    int _line = 1;
+    
     auto MakeToken(TokenType type) -> Token;
     auto MatchChar(char to_match) -> bool;
     void SkipWhitespace();

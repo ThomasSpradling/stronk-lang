@@ -1,6 +1,6 @@
 #include "scanner.h"
 
-Scanner::Scanner(const std::string_view source) : _start(source.begin()), _current(source.begin()), _line(1), _source(source) {}
+Scanner::Scanner(const std::string_view source) : _start(source.begin()), _current(source.begin()), _source(source) {}
 
 // Utility mathod to determine whether the current character
 // matches the passed in character.
@@ -51,8 +51,14 @@ auto Scanner::ScanToken() -> Token {
         return MakeToken(TokenType::TOKEN_EOF);
     }
 
+    // String mode activates while scanning within
+    // a string.
+    if (mode == ScannerMode::MODE_STRING) {
+        return ScanString();
+    }
+
     // Get next character and move forward.
-    char c = *(_current++);
+    char c = *_current++;
 
     if (IsAlpha(c)) {
         return ScanIdentifier();
@@ -65,7 +71,11 @@ auto Scanner::ScanToken() -> Token {
         case '(': return MakeToken(TokenType::LEFT_PAREN);
         case ')': return MakeToken(TokenType::RIGHT_PAREN);
         case '{': return MakeToken(TokenType::LEFT_BRACE);
-        case '}': return MakeToken(TokenType::RIGHT_BRACE);
+        case '}':
+            if (str_depth > 0) {
+                mode = ScannerMode::MODE_STRING;
+            }
+            return MakeToken(TokenType::RIGHT_BRACE);
         case ';': return MakeToken(TokenType::SEMICOLON);
         case ',': return MakeToken(TokenType::COMMA);
         case '.': return MakeToken(TokenType::DOT);
@@ -81,28 +91,47 @@ auto Scanner::ScanToken() -> Token {
             MatchChar('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
         case '>': return MakeToken(
             MatchChar('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
-        case '"': return ScanString();
+        case '"':
+            str_depth++;
+            mode = ScannerMode::MODE_STRING;
+            return MakeToken(TokenType::QUOTE);
     }
 
     return MakeErrorToken("Unexpected character.");
 }
 
-// Scans through a string.
+// Assumes in string mode. Gets next token found in string.
 auto Scanner::ScanString() -> Token {
-    while (*_current != '"' && _current != _source.end()) {
-        if (*_current == '\n') {
-            // Account for newline characters.
-            _line++;
+    for (;;) {
+        if (_current == _source.end()) {
+            return MakeErrorToken("Unterminated string.");
         }
-        _current++;
-    }
 
-    if (_current == _source.end()) {
-        return MakeErrorToken("Unterminated string.");
-    }
+        char c = *_current++;
 
-    _current++;
-    return MakeToken(TokenType::STRING);
+        switch (c) {
+            case '"':
+                mode = ScannerMode::MODE_NORMAL;
+                str_depth--;
+                return MakeToken(TokenType::QUOTE);
+            case '$':
+                if (MatchChar('{')) {
+                    mode = ScannerMode::MODE_NORMAL;
+                    return MakeToken(TokenType::DOLLAR_BRACE);
+                }
+            case '\n':
+                _line++;
+                break;
+            default:
+                // If the next characters will cause us to leave string mode, return text.
+                if (_current == _source.end() || *_current == '"') {
+                    return MakeToken(TokenType::STRING);
+                }
+                if (_current + 1 == _source.end() || *_current == '$' && *(_current + 1) == '{') {
+                    return MakeToken(TokenType::STRING);
+                }
+        }
+    }
 }
 
 // Utility method to determine where a character is
