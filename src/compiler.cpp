@@ -3,62 +3,8 @@
 #include <string>
 #include "compiler.h"
 
-
-
-// Grabs next non-error token. Returns false if
-// an error occurs and true otherwise.
-// void Compiler::StepForward() {
-//     previous = current;
-
-//     for (;;) {
-//         current = _scanner.ScanToken();
-//         if (current.type != TokenType::ERROR) {
-//             break;
-//         }
-
-//         ErrorAt(current, current.start);
-//     }
-// }
-
-// Steps forward if the current token matches the passed
-// in token type. If it doesn, creates an error with message
-// `message`.
-// void Compiler::StepIfMatch(TokenType type, std::string_view message) {
-//     if (current.type == type) {
-//         StepForward();
-//         return;
-//     }
-
-//     ErrorAt(current, message);
-// }
-
-// void Compiler::ErrorAt(Token &token, std::string_view message) {
-//     if (is_panic_mode) {
-//         return;
-//     }
-//     is_panic_mode = true;
-//     std::cerr << "[line " << token.line << "] Error";
-
-//     if (token.type == TokenType::TOKEN_EOF) {
-//         std::cerr << " at end";
-//     } else if (token.type != TokenType::ERROR) {
-//         std::cerr << " at '";
-//         std::cerr.write(token.start, token.length);
-//         std::cerr << "'";
-//     }
-
-//     std::cerr << ": " << message << "\n";
-//     error_occurred = true;
-// }
-
 // Compiles the source after scanning it.
 auto Compiler::Compile(std::string_view source) -> bool {
-    // End with return.
-    // StepForward();
-    // StepIfMatch(TokenType::TOKEN_EOF, "Expected end of expression.");
-    // current_chunk.AddChunk(OpCode::OP_RETURN, previous.line);
-    // return !error_occurred;
-
     scanner.LoadSource(source);
     std::vector<Token> tokens;
     
@@ -68,25 +14,30 @@ auto Compiler::Compile(std::string_view source) -> bool {
 
     for (;;) {
         std::unique_ptr<Token> token = scanner.ScanNextToken();
-        // parser.AddToken();
+        auto token_line = token->line_;
+        auto token_type = token->type_;
+        std::string token_form = token->ToString();
+        parser.AddToken(std::move(token));
 
         #if DEBUG_TRACE_EXECUTION
-        if (token->line_ != line) {
-            std::cout << std::setw(4) << std::setfill(' ') << " " + std::to_string(token->line_);
-            line = token->line_;
+        if (token_line != line) {
+            std::cout << std::setw(4) << std::setfill(' ') << " " + std::to_string(token_line);
+            line = token_line;
         } else {
             std::cout << "   |";
         }
 
-        std::cout << " " << token->ToString() << "\n";
+        std::cout << " " << token_form << "\n";
         #endif
 
-        if (token->type_ == TokenType::TOKEN_EOF) {
+        if (token_type == TokenType::TOKEN_EOF) {
             break;
         }
     }
 
-    bytecode = parser.Parse();
+    parser.Parse();
+
+    bytecode = parser.GetBytecode();
     return true;
 }
 

@@ -16,6 +16,7 @@ public:
     void AddConstantInstruction(Value val);
     auto Size() -> size_t;
     void DissasembleCode();
+    auto GetCode() -> Bytecode;
 };
 
 #endif // _STRONK_CODE_GENERATOR_H

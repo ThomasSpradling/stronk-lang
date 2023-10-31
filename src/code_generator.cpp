@@ -20,3 +20,7 @@ auto CodeGenerator::Size() -> size_t {
 void CodeGenerator::DissasembleCode() {
     
 }
+
+auto GetCode() -> Bytecode {
+    
+}
