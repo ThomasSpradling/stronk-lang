@@ -5,26 +5,30 @@
 #include "chunk.h"
 #include "common.h"
 #include "scanner.h"
+#include "parser.h"
 
 // Compiles tokens provided by Scanner into
 // bytecode.
 class Compiler {
 private:
-    Scanner _scanner;
-    Token current;
-    Token previous;
-    bool error_occurred = false;
-    bool is_panic_mode = false; // Prevents cascade errors.
-    Chunk &current_chunk;
+    Scanner scanner;
+    Parser parser;
+    Bytecode bytecode;
 
-    void StepForward();
-    void StepIfMatch(TokenType type, std::string_view message);
-    void ErrorAt(Token &token, std::string_view message);
-    void ParseNumber();
+    // Token current;
+    // Token previous;
+    // bool error_occurred = false;
+    // bool is_panic_mode = false; // Prevents cascade errors.
+    // Chunk &current_chunk;
+
+    // void StepForward();
+    // void StepIfMatch(TokenType type, std::string_view message);
+    // void ErrorAt(Token &token, std::string_view message);
+
 public:
-    Compiler(const std::string_view source, Chunk &chunk);
-    
-    auto Compile() -> bool;
+    Compiler() = default;
+    auto Compile(std::string_view source) -> bool;
+    auto GetBytecode() -> Bytecode;
 };
 
 #endif // _STRONK_COMPILER_H

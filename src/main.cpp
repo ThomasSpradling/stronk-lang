@@ -4,9 +4,8 @@
 #include <sstream>
 
 #include "common.h"
-#include "chunk.h"
-#include "debug.h"
-#include "vm.h"
+#include "compiler.h"
+// #include "vm.h"
 
 #define COMPUTE_PERF 0
 
@@ -16,9 +15,6 @@ using namespace std::chrono;
 
 #define INTERPRET_WITH_PERF() \
     auto start = std::chrono::high_resolution_clock::now(); \
-\
-    InterpretResult result = vm.interpret(); \
-\
     auto stop = std::chrono::high_resolution_clock::now(); \
     auto duration = duration_cast<microseconds>(stop - start); \
     std::cout << duration.count() / 1000.0 << " ms\n";
@@ -27,7 +23,12 @@ using namespace std::chrono;
 // Starts reading from standard input as a REPL and
 // compiles + interprets (the bytecode) of each line.
 static void Repl() {
+    // TODO(thomasspradling): Handle REPL scoping.
+
     std::string line;
+    Compiler compiler;
+    // VirtualMachine vm;
+
     for (;;) {
         std::cout << "> ";
 
@@ -36,15 +37,13 @@ static void Repl() {
             break;
         }
 
-         VirtualMachine vm(line);
+        if (compiler.Compile(line)) {
+            exit(65); // compile time error
+        }
 
-#if COMPUTE_PERF
-        INTERPRET_WITH_PERF()
-#else
-        InterpretResult result = vm.Interpret();
-#endif
-        if (result == INTERPRET_COMPILE_ERROR) { exit(65); }
-        if (result == INTERPRET_RUNTIME_ERROR) { exit(70); }
+        // if (vm.Interpret(compiler.GetBytecode())) {
+        //     exit(70); // runtime error
+        // }
     }
 }
 
@@ -64,17 +63,16 @@ static void RunFile(std::string_view path) {
 
     std::string source = buffer.str();
 
-    VirtualMachine vm(source);
+    Compiler compiler;
+    // VirtualMachine vm;
 
-    // Interpret result and throw errors as necessary.
-#if COMPUTE_PERF
-    INTERPRET_WITH_PERF()
-#else
-    InterpretResult result = vm.Interpret();
-#endif
+    if (compiler.Compile(source)) {
+        exit(65); // compile time error
+    }
 
-    if (result == INTERPRET_COMPILE_ERROR) { exit(65); }
-    if (result == INTERPRET_RUNTIME_ERROR) { exit(70); }
+    // if (vm.Interpret(compiler.GetBytecode())) {
+    //     exit(70); // runtime error
+    // }
 }
 
 auto main(int argc, const char *argv[]) -> int {
@@ -86,6 +84,5 @@ auto main(int argc, const char *argv[]) -> int {
         std::cerr << "Usage: stronk [path]\n";
         exit(64);
     }
-
     return 0;
 }

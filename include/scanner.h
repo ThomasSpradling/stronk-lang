@@ -2,76 +2,53 @@
 #define _STRONK_SCANNER_H
 
 #include <string>
+#include <sstream>
+#include <unordered_map>
+#include "common.h"
+#include "token.h"
 
-enum TokenType {
-    // Single character tokens
-    LEFT_PAREN, RIGHT_PAREN,
-    LEFT_BRACE, RIGHT_BRACE,
-    COMMA, DOT,
-    MINUS, PLUS,
-    SEMICOLON, SLASH, STAR,
-    QUOTE,
-
-    BANG, BANG_EQUAL,
-    EQUAL, EQUAL_EQUAL,
-    GREATER, GREATER_EQUAL,
-    LESS, LESS_EQUAL,
-    DOLLAR_BRACE, ESCAPED,
-
-    // Literals
-    IDENTIFIER, STRING, NUMBER,
-
-    // Keywords
-    AND, CLASS, ELSE, FALSE,
-    FOR, FUN, IF, NIL, OR,
-    PRINT, RETURN, SUPER, THIS,
-    TRUE, VAR, WHILE,
-
-    // Error token passed to compiler.
-    ERROR,
-    
-    TOKEN_EOF
+// The state of the scanner:
+//  - Normal implies the scanner is currently scanning code.
+//  - String implies the scanner is scanning a potentially formatted string.
+enum class ScannerState {
+    NORMAL,
+    STRING
 };
 
-struct Token {
-    TokenType type;
-    std::string_view::iterator start;
-    int length;
-    int line;
-};
-
-enum ScannerMode {
-    MODE_NORMAL,
-    MODE_STRING
+struct ScannerMode {
+    ScannerState state = ScannerState::NORMAL;
+    int str_depth = 0;
 };
 
 // Lexical analysis over the source to allow for
 // compiling.
 class Scanner {
 private:
+    std::ostringstream buffer;
+
     std::string_view _source;
     std::string_view::iterator _start;
     std::string_view::iterator _current;
-    ScannerMode mode = ScannerMode::MODE_NORMAL;
-    int str_depth = 0;
+    ScannerMode _mode;
     int _line = 1;
     
-    auto MakeToken(TokenType type) -> Token;
+    auto MakeToken(TokenType type) -> std::unique_ptr<Token>;
+    template <class T> auto MakeToken(TokenType type, T value) -> std::unique_ptr<ValueToken<T>>;
+    auto MakeTypeToken(PrimitiveType type, int width) -> std::unique_ptr<TypeToken>;
+    auto MakeErrorToken(std::string message) -> std::unique_ptr<ValueToken<std::string>>;
+
     auto MatchChar(char to_match) -> bool;
     void SkipWhitespace();
-    auto MakeErrorToken(std::string_view message) -> Token;
-
-    auto ScanString() -> Token;
-
-    auto IsDigit(char c) -> bool;
-    auto ScanNumber() -> Token;
-
-    auto IsAlpha(char c) -> bool;
-    auto CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> Token;
-    auto ScanIdentifier() -> Token;
+    auto ScanString() -> std::unique_ptr<Token>;
+    auto ScanNumber() -> std::unique_ptr<Token>;
+    auto CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> std::unique_ptr<Token>;
+    auto CheckTypeKeyword(int start, int length, std::string_view rest, PrimitiveType type, int width) -> std::unique_ptr<Token>;
+    auto ScanIdentifier() -> std::unique_ptr<Token>;
+    void PushError(std::string message);
 public:
-    Scanner(const std::string_view source);
-    auto ScanToken() -> Token;
+    Scanner() = default;
+    void LoadSource(std::string_view source);
+    auto ScanNextToken() -> std::unique_ptr<Token>;
 };
 
 #endif // _STRONK_SCANNER_H

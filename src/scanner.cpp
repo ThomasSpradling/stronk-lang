@@ -1,7 +1,118 @@
 #include <iostream>
+#include <sstream>
 #include "scanner.h"
 
-Scanner::Scanner(const std::string_view source) : _start(source.begin()), _current(source.begin()), _source(source) {}
+/***** Nonmember Functions ***/
+
+// Determines if character a letter or underscore.
+auto IsAlpha(char c) -> bool {
+    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'; 
+}
+
+
+/***** Member Methods ********/
+
+std::unordered_map<std::string, TokenType> reserved_keywords {
+    { "and", TokenType::AND },
+    { "class", TokenType::CLASS },
+    { "else", TokenType::ELSE },
+    { "false", TokenType::FALSE },
+    { "for", TokenType::FOR },
+    { "func", TokenType::FUN },
+    { "if", TokenType::IF },
+    { "nil", TokenType::NIL },
+    { "or", TokenType::OR },
+    { "print", TokenType::PRINT },
+    { "return", TokenType::RETURN },
+    { "super", TokenType::SUPER },
+    { "this", TokenType::THIS },
+    { "true", TokenType::TRUE },
+    { "var", TokenType::VAR },
+    { "while", TokenType::WHILE },
+};
+
+std::unordered_map<std::string, std::pair<PrimitiveType, int>> reserved_typenames {
+    { "int", { PrimitiveType::INT, _STRONK_INT_WIDTH } },
+    { "real", { PrimitiveType::REAL, _STRONK_FLOAT_WIDTH } },
+    { "char", { PrimitiveType::CHAR, 1 } },
+    { "bool", { PrimitiveType::BOOL, 1 } }
+};
+
+// Loads source into buffer.
+void Scanner::LoadSource(std::string_view source) {
+    _source = source;
+
+    _start = _source.begin();
+    _current = _source.begin();
+}
+
+// Scans next token found in buffer.
+auto Scanner::ScanNextToken() -> std::unique_ptr<Token> {
+    // String mode should leave whitespace alone.
+    if (_mode.state != ScannerState::STRING) {
+        SkipWhitespace();
+    }
+    _start = _current;
+
+    if (_current == _source.end()) {
+        if (_mode.str_depth != 0) {
+            _mode.str_depth = 0;
+            return MakeErrorToken("Unterminated string.");
+        }
+        return MakeToken(TokenType::TOKEN_EOF);
+    }
+
+    // String mode activates while scanning within
+    // a string.
+    if (_mode.state == ScannerState::STRING) {
+        return ScanString();
+    }
+
+    // Get next character and move forward.
+    char c = *_current++;
+
+    if (IsAlpha(c)) {
+        return ScanIdentifier();
+    }
+    if (isdigit(c) != 0) {
+        return ScanNumber();
+    }
+
+    switch (c) {
+        case '(': return MakeToken(TokenType::LEFT_PAREN);
+        case ')': return MakeToken(TokenType::RIGHT_PAREN);
+        case '[': return MakeToken(TokenType::LEFT_BRACKET);
+        case ']': return MakeToken(TokenType::RIGHT_BRACKET);
+        case '{': return MakeToken(TokenType::LEFT_BRACE);
+        case '}':
+            if (_mode.str_depth > 0) {
+                _mode.state = ScannerState::STRING;
+            }
+            return MakeToken(TokenType::RIGHT_BRACE);
+        case ';': return MakeToken(TokenType::SEMICOLON);
+        case ',': return MakeToken(TokenType::COMMA);
+        case '.': return MakeToken(TokenType::DOT);
+        case '-': return MakeToken(TokenType::MINUS);
+        case '+': return MakeToken(TokenType::PLUS);
+        case '/': return MakeToken(TokenType::SLASH);
+        case '*': return MakeToken(TokenType::STAR);
+        case '!': return MakeToken(
+            MatchChar('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
+        case '=': return MakeToken(
+            MatchChar('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
+        case '<': return MakeToken(
+            MatchChar('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
+        case '>': return MakeToken(
+            MatchChar('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
+        case '"':
+            _mode.str_depth++;
+            _mode.state = ScannerState::STRING;
+            return MakeToken(TokenType::QUOTE);
+    }
+
+    return MakeErrorToken("Unexpected character.");
+}
+
 
 // Utility mathod to determine whether the current character
 // matches the passed in character.
@@ -65,73 +176,9 @@ void Scanner::SkipWhitespace() {
     }
 }
 
-// Scans a single token from the input source.
-auto Scanner::ScanToken() -> Token {
-    // String mode should leave whitespace alone.
-    if (mode != ScannerMode::MODE_STRING) {
-        SkipWhitespace();
-    }
-    _start = _current;
-
-    if (_current == _source.end()) {
-        if (str_depth != 0) {
-            str_depth = 0;
-            return MakeErrorToken("Unterminated string.");
-        }
-        return MakeToken(TokenType::TOKEN_EOF);
-    }
-
-    // String mode activates while scanning within
-    // a string.
-    if (mode == ScannerMode::MODE_STRING) {
-        return ScanString();
-    }
-
-    // Get next character and move forward.
-    char c = *_current++;
-
-    if (IsAlpha(c)) {
-        return ScanIdentifier();
-    }
-    if (IsDigit(c)) {
-        return ScanNumber();
-    }
-
-    switch (c) {
-        case '(': return MakeToken(TokenType::LEFT_PAREN);
-        case ')': return MakeToken(TokenType::RIGHT_PAREN);
-        case '{': return MakeToken(TokenType::LEFT_BRACE);
-        case '}':
-            if (str_depth > 0) {
-                mode = ScannerMode::MODE_STRING;
-            }
-            return MakeToken(TokenType::RIGHT_BRACE);
-        case ';': return MakeToken(TokenType::SEMICOLON);
-        case ',': return MakeToken(TokenType::COMMA);
-        case '.': return MakeToken(TokenType::DOT);
-        case '-': return MakeToken(TokenType::MINUS);
-        case '+': return MakeToken(TokenType::PLUS);
-        case '/': return MakeToken(TokenType::SLASH);
-        case '*': return MakeToken(TokenType::STAR);
-        case '!': return MakeToken(
-            MatchChar('=') ? TokenType::BANG_EQUAL : TokenType::BANG);
-        case '=': return MakeToken(
-            MatchChar('=') ? TokenType::EQUAL_EQUAL : TokenType::EQUAL);
-        case '<': return MakeToken(
-            MatchChar('=') ? TokenType::LESS_EQUAL : TokenType::LESS);
-        case '>': return MakeToken(
-            MatchChar('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
-        case '"':
-            str_depth++;
-            mode = ScannerMode::MODE_STRING;
-            return MakeToken(TokenType::QUOTE);
-    }
-
-    return MakeErrorToken("Unexpected character.");
-}
-
 // Assumes in string mode. Gets next token found in string.
-auto Scanner::ScanString() -> Token {
+auto Scanner::ScanString() -> std::unique_ptr<Token> {
+    std::ostringstream oss;
     for (;;) {
         if (_current == _source.end()) {
             return MakeErrorToken("Unterminated string.");
@@ -143,61 +190,73 @@ auto Scanner::ScanString() -> Token {
             case '\\':
                 // Escaped characters are their own tokens.
                 _current++;
-                return MakeToken(TokenType::ESCAPED);
+                return MakeToken<char>(TokenType::ESCAPED, *_current);
             case '"':
-                mode = ScannerMode::MODE_NORMAL;
-                str_depth--;
+                _mode.state = ScannerState::NORMAL;
+                _mode.str_depth--;
                 return MakeToken(TokenType::QUOTE);
             case '$':
                 if (MatchChar('{')) {
-                    mode = ScannerMode::MODE_NORMAL;
+                    _mode.state = ScannerState::NORMAL;
                     return MakeToken(TokenType::DOLLAR_BRACE);
                 }
             case '\n':
                 _line++;
                 break;
             default:
+                oss << *(_current - 1);
                 // If the next characters us to cut string.
                 if (_current == _source.end() || *_current == '"' || *_current  == '\\') {
-                    return MakeToken(TokenType::STRING);
+                    std::string value = oss.str();
+                    return MakeToken<std::string>(TokenType::TEXT, value);
                 }
                 if (_current + 1 == _source.end() || *_current == '$' && *(_current + 1) == '{') {
-                    return MakeToken(TokenType::STRING);
+                    std::string value = oss.str();
+                    return MakeToken<std::string>(TokenType::TEXT, value);
                 }
         }
     }
 }
 
-// Utility method to determine where a character is
-// a digit.
-auto Scanner::IsDigit(char c) -> bool {
-    return c >= '0' && c <= '9';
-}
-
-
 // Scans through numbers.
-auto Scanner::ScanNumber() -> Token {
-    while (IsDigit(*_current)) {
+auto Scanner::ScanNumber() -> std::unique_ptr<Token> {
+    int value = 0;
+    _current--;
+
+    if (isdigit(*_current) == 0) {
+        _current++;
+        return MakeErrorToken("Expected a digit.");
+    }
+
+    while (isdigit(*_current) != 0) {
+        value = 10 * value + *_current - '0';
         _current++;
     }
 
-    if (*_current == '.' && IsDigit(*(_current + 1))) {
+    if (*_current != '.') {
+        return MakeToken<int>(TokenType::INT, value);
+    }
+
+    if (isdigit(*(_current + 1)) != 0) {
         _current++;
 
-        while (IsDigit(*_current)) {
+        float float_value = value;
+        float d = 10;
+
+        while (isdigit(*_current) != 0) {
             _current++;
+            float_value += (*_current - '0') / d;
+            d *= 10;
         }
+
+        return MakeToken<float>(TokenType::REAL, float_value);
     }
-
-    return MakeToken(TokenType::NUMBER);
+    
+    return MakeErrorToken("Expected a digit after decimal in literal.");
 }
 
-// Determines if character a letter or underscore.
-auto Scanner::IsAlpha(char c) -> bool {
-    return (c >= 'a' && c <= 'z') || (c >= 'A' && c <= 'Z') || c == '_'; 
-}
-
-auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> Token {
+// Helper function for scanning identifier tokens that are keywords.
+auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> std::unique_ptr<Token> {
     std::string_view::iterator start_iter = _start + start;
     std::string_view view(start_iter, length);
     if (_current - _start == start + length && view == rest) {
@@ -207,51 +266,58 @@ auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenTy
     return MakeToken(TokenType::IDENTIFIER);
 }
 
-// Scans identifier, which begin with letter (or underscore) and
-// with all other characters being letters, underscores, or numbers.
-auto Scanner::ScanIdentifier() -> Token {
-    while (IsAlpha(*_current) || IsDigit(*_current)) {
-        _current++;
-    }
-    switch (*_start) {
-        case 'a': return CheckKeyword(1, 2, "nd", TokenType::AND);
-        case 'c': return CheckKeyword(1, 4, "lass", TokenType::CLASS);
-        case 'e': return CheckKeyword(1, 3, "lse", TokenType::ELSE);
-        case 'f':
-            if (_current - _start > 1) {
-                switch (*(_start + 1)) {
-                    case 'a': return CheckKeyword(2, 3, "lse", TokenType::FALSE);
-                    case 'o': return CheckKeyword(2, 1, "r", TokenType::FOR);
-                    case 'u': return CheckKeyword(2, 1, "n", TokenType::FUN);
-                }
-            }
-            break;
-        case 'i': return CheckKeyword(1, 1, "f", TokenType::IF);
-        case 'n': return CheckKeyword(1, 2, "il", TokenType::NIL);
-        case 'o': return CheckKeyword(1, 1, "r", TokenType::OR);
-        case 'p': return CheckKeyword(1, 4, "rint", TokenType::PRINT);
-        case 'r': return CheckKeyword(1, 5, "eturn", TokenType::RETURN);
-        case 's': return CheckKeyword(1, 4, "uper", TokenType::SUPER);
-        case 't':
-            if (_current - _start > 1) {
-                switch (*(_start + 1)) {
-                    case 'h': return CheckKeyword(2, 2, "is", TokenType::THIS);
-                    case 'r': return CheckKeyword(2, 2, "ue", TokenType::TRUE);
-                }
-            }
-        case 'v': return CheckKeyword(1, 2, "ar", TokenType::VAR);
-        case 'w': return CheckKeyword(1, 4, "hile", TokenType::WHILE);
+// Helper function for scanning identifier tokens that are type keywords.
+auto Scanner::CheckTypeKeyword(int start, int length, std::string_view rest, PrimitiveType type, int width) -> std::unique_ptr<Token> {
+    std::string_view::iterator start_iter = _start + start;
+    std::string_view view(start_iter, length);
+    if (_current - _start == start + length && view == rest) {
+        return MakeTypeToken(type, width);
     }
 
     return MakeToken(TokenType::IDENTIFIER);
 }
 
+// Scans identifier, which begin with letter (or underscore) and
+// with all other characters being letters, underscores, or numbers.
+auto Scanner::ScanIdentifier() -> std::unique_ptr<Token> {
+    std::ostringstream oss;
+    _current--;
+    while (isalpha(*_current) != 0) {
+        oss << *_current;
+        _current++;
+    }
+    std::string id = oss.str();
+
+    if (reserved_keywords.find(id) != reserved_keywords.end()) {
+        return MakeToken(reserved_keywords[id]);
+    }
+    
+    if (reserved_typenames.find(id) != reserved_typenames.end()) {
+        auto [type, width] = reserved_typenames[id];
+        return MakeTypeToken(type, width);
+    }
+
+    return MakeToken<std::string>(TokenType::IDENTIFIER, id);
+}
+
 // Helper method to build a token with `type`.
-auto Scanner::MakeToken(TokenType type) -> Token {
-    return { type, _start, static_cast<int>(_current - _start), _line };
+auto Scanner::MakeToken(TokenType type) -> std::unique_ptr<Token> {
+    return std::make_unique<Token>(type, 0, _line);
+}
+
+// Helper method to build a value token: One that contains additional value
+// information.
+template <class T>
+auto Scanner::MakeToken(TokenType type, T value) -> std::unique_ptr<ValueToken<T>> {
+    return std::make_unique<ValueToken<T>>(type, 0, _line, value);
+}
+
+// Helper method to build a type token, One with two pieces of information -- name and width.
+auto Scanner::MakeTypeToken(PrimitiveType type, int width) -> std::unique_ptr<TypeToken> {
+    return std::make_unique<TypeToken>(TokenType::PRIMITIVE, 0, _line, type, width);
 }
 
 // Helper method to build a token with error message.
-auto Scanner::MakeErrorToken(std::string_view message) -> Token {
-    return { TokenType::ERROR, message.begin(), static_cast<int>(message.length()), _line };
+auto Scanner::MakeErrorToken(std::string message) -> std::unique_ptr<ValueToken<std::string>> {
+    return std::make_unique<ValueToken<std::string>>(TokenType::ERROR, 0, _line, std::move(message));
 }
