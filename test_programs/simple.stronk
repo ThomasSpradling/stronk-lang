@@ -1,14 +1,1 @@
-char[] str = "amigo";
-int num = 2030;
-
-/*
-
-/*
-int code = "three;
-// char a = 'a';
-*/
-
-*/
-
-char[] str = "hello, ${ friend } #${ num }!"; // a string is an array of chars
-print str;
+5 + 3 * - 8 - 12

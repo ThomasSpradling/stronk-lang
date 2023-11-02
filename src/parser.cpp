@@ -2,34 +2,43 @@
 #include "parser.h"
 
 // Adds a sinle token to the token list.
-void Parser::AddToken(std::unique_ptr<Token> token) {
+void Parser::AddToken(std::shared_ptr<Token> token) {
     tokens.push_back(std::move(token));
 }
 
 // Parses the token list and returns corresponding bytecode.
 void Parser::Parse() {
+    current = tokens.begin();
+    previous = tokens.end();
     ParseExpression();
 }
 
 auto Parser::ParseExpression() -> Address {
     Address dest = ParseFactor();
     for (;;) {
-        TokenType op = current->get()->type_;
+        Token &tok = **current;
         Address a;
         Address b;
 
-        StepForward();
-
-        switch (op) {
+        switch (tok.type_) {
             case TokenType::TOKEN_EOF: return dest;
             case TokenType::PLUS:
-            case TokenType::MINUS:
+                StepForward();
                 a = dest;
                 b = ParseFactor();
 
-                dest = GenerateTemp();
+                dest = num_gen.GenerateTemp();
 
-                EmitInstruction(dest, op, a, b);
+                EmitInstruction(dest, OpCode::ADD, a, b);
+                break;
+            case TokenType::MINUS:
+                StepForward();
+                a = dest;
+                b = ParseFactor();
+
+                dest = num_gen.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::SUB, a, b);
                 break;
             default:
                 ErrorAt(*previous, "Unexpected token.");
@@ -41,24 +50,33 @@ auto Parser::ParseExpression() -> Address {
 auto Parser::ParseFactor() -> Address {
     Address dest = ParseUnary();
     for (;;) {
-        TokenType op = current->get()->type_;
+        Token &tok = **current;
         Address a;
         Address b;
 
-        StepForward();
+        OpCode op;
 
-        switch (op) {
+        switch (tok.type_) {
             case TokenType::SLASH:
-            case TokenType::STAR:
+                StepForward();
                 a = dest;
-                b = ParseUnary();
+                b = ParseFactor();
 
-                dest = GenerateTemp();
+                dest = num_gen.GenerateTemp();
 
-                EmitInstruction(dest, op, a, b);
+                EmitInstruction(dest, OpCode::DIV, a, b);
+                break;
+            case TokenType::STAR:
+                StepForward();
+                a = dest;
+                b = ParseFactor();
+
+                dest = num_gen.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::MULT, a, b);
                 break;
             default:
-                ErrorAt(*previous, "Unexpected token.");
+                return dest;
         }
     }
     return dest;
@@ -66,16 +84,17 @@ auto Parser::ParseFactor() -> Address {
 
 auto Parser::ParseUnary() -> Address {
     TokenType op = current->get()->type_;
-    StepForward();
 
     if (op == TokenType::MINUS) {
+        StepForward();
         Address a = ParseUnary();
-        Address dest = GenerateTemp();
-        EmitInstruction(dest, op, a);
-    } else {
-        return ParsePrimary();
+        Address dest = num_gen.GenerateTemp();
+        EmitInstruction(dest, OpCode::NEGATE, a);
+        return dest;
     }
+    return ParsePrimary();
 }
+
 
 auto Parser::ParsePrimary() -> Address {
     TokenType a = current->get()->type_;
@@ -84,14 +103,28 @@ auto Parser::ParsePrimary() -> Address {
     Address dest;
     ValueToken<std::string> *b;
 
+    ValueToken<float> *value_float;
+    ValueToken<int> *value_int;
+
     switch (a) {
-        case TokenType::TRUE:
-        case TokenType::FALSE:
-        case TokenType::NIL:
+        case TokenType::TRUE: return EmitConstInstruction(BoolValue{true});
+        case TokenType::FALSE:  return EmitConstInstruction(BoolValue{false});
+        case TokenType::NIL: return EmitConstInstruction(NilValue{});
         case TokenType::REAL:
+            value_float = dynamic_cast<ValueToken<float> *>(previous->get());
+            if (value_float == nullptr) {
+                ErrorAt(*previous, "Expected float.");
+            } else {
+                return EmitConstInstruction(RealValue(value_float->value_));
+            }
+            break;
         case TokenType::INT:
-            dest = GenerateTemp();
-            EmitConstInstruction(dest, a);
+            value_int = dynamic_cast<ValueToken<int> *>(previous->get());
+            if (value_int == nullptr) {
+                 ErrorAt(*previous, "Expected float.");
+            } else {
+                return EmitConstInstruction(RealValue(value_int->value_));
+            }
             break;
         case TokenType::IDENTIFIER:
             b = dynamic_cast<ValueToken<std::string> *>(previous->get());
@@ -100,13 +133,31 @@ auto Parser::ParsePrimary() -> Address {
             } else {
                 dest = b->value_;
             }
+            break;
         default:
             ErrorAt(*previous, "Unexpected token.");
     }
     return dest;
 }
 
+template <typename... Args>
+void Parser::EmitInstruction(Address &dest, OpCode op, Args... args) {
+    int line = previous->get()->line_;
+    int position = previous->get()->position_;
+    std::vector<Address> args_vec = {args...};
+    cg.AddInstruction(std::make_shared<PureInstr>(op, dest, args_vec, line, position));
+}
+
+auto Parser::EmitConstInstruction(const Value &val) -> Address {
+    Address dest = num_gen.GenerateTemp();
+    int line = previous->get()->line_;
+    int position = previous->get()->position_;
+    cg.AddConstantInstruction(dest, val, line, position);
+    return dest;
+}
+
 auto Parser::GetBytecode() -> Bytecode {
+    cg.DissasembleCode();
     return cg.GetCode();
 }
 
@@ -142,7 +193,7 @@ void Parser::StepIfMatch(TokenType type, std::string_view message) {
     ErrorAt(*current, message);
 }
 
-void Parser::ErrorAt(std::unique_ptr<Token> &token, std::string_view message) {
+void Parser::ErrorAt(std::shared_ptr<Token> &token, std::string_view message) {
     if (is_panic_mode) {
         return;
     }

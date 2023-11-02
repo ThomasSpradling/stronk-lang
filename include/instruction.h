@@ -7,7 +7,7 @@ using Address = std::string;
 using Label = std::string;
 
 enum class OpCode {
-    ADD,
+    NEGATE, ADD, SUB, MULT, DIV,
     LABEL,
     CALL,
     PHI,
@@ -16,12 +16,22 @@ enum class OpCode {
 
 struct Instr {
     OpCode code_;
+    int line_;
+    int pos_;
 
-    explicit Instr(OpCode code) : code_(code) {}
+    explicit Instr(OpCode code, int line, int pos) : code_(code), line_(line), pos_(pos) {}
 
     virtual auto ToString() const -> std::string {
         switch (code_) {
             case OpCode::ADD: return "ADD";
+            case OpCode::SUB: return "SUB";
+            case OpCode::MULT: return "MULT";
+            case OpCode::DIV: return "DIV";
+            case OpCode::LABEL: return "LABEL";
+            case OpCode::CALL: return "CALL";
+            case OpCode::PHI: return "PHI";
+            case OpCode::CONST: return "CONST";
+            case OpCode::NEGATE: return "NEGATE";
             default: return "UNKNOWN_INSTR";
         };
     };
@@ -31,7 +41,7 @@ struct Instr {
 struct LabelInstr : public Instr {
     Label label_;
 
-    explicit LabelInstr(Label &label) : Instr(OpCode::LABEL), label_(label) {}
+    explicit LabelInstr(Label &label, int line, int pos) : Instr(OpCode::LABEL, line, pos), label_(label) {}
 
     auto ToString() const -> std::string override {
         std::string res = Instr::ToString();
@@ -45,7 +55,7 @@ struct ImpureInstr : public Instr {
     std::vector<Label> labels_;
     std::vector<Address> args_;
 
-    ImpureInstr(OpCode code, std::vector<Address> &args, std::vector<Label> &labels) : Instr(code), labels_(labels), args_(args) {}
+    ImpureInstr(OpCode code, std::vector<Address> &args, std::vector<Label> &labels, int line, int pos) : Instr(code, line, pos), labels_(labels), args_(args) {}
 
     auto ToString() const -> std::string override {
         std::string res = Instr::ToString() + " ";
@@ -72,7 +82,7 @@ struct CallInstr : public Instr {
     int func_;
     std::vector<Address> args_;
 
-    CallInstr(Address &dest, std::vector<Address> &args, int func) : Instr(OpCode::CALL), args_(args), func_(func), dest_(dest) {}
+    CallInstr(Address &dest, std::vector<Address> &args, int func, int line, int pos) : Instr(OpCode::CALL, line, pos), args_(args), func_(func), dest_(dest) {}
 
     auto ToString() const -> std::string override {
         std::string res;
@@ -96,7 +106,7 @@ struct PureInstr : public Instr {
     Address dest_;
     std::vector<Address> args_;
 
-    PureInstr(OpCode code, Address &dest, std::vector<Address> &args) : Instr(code), dest_(dest), args_(args) {}
+    PureInstr(OpCode code, Address &dest, std::vector<Address> &args, int line, int pos) : Instr(code, line, pos), dest_(dest), args_(args) {}
     
     auto ToString() const -> std::string override {
         std::string res = dest_ + " = " + Instr::ToString() + " ";
@@ -113,7 +123,7 @@ struct PhiInstr : public Instr {
     std::vector<Label> labels_;
     std::vector<Address> args_;
 
-    PhiInstr(Address &dest, std::vector<Address> &args, std::vector<Label> &labels) : Instr(OpCode::PHI), dest_(dest), labels_(labels), args_(args) {}
+    PhiInstr(Address &dest, std::vector<Address> &args, std::vector<Label> &labels, int line, int pos) : Instr(OpCode::PHI, line, pos), dest_(dest), labels_(labels), args_(args) {}
 
     auto ToString() const -> std::string override {
         std::string res = dest_ + " = " + Instr::ToString() + " ";
@@ -137,12 +147,12 @@ struct PhiInstr : public Instr {
 // Constant instructions associate values to variables.
 struct ConstInstr : public Instr {
     Address dest_;
-    int val_;
+    int index_;
 
-    ConstInstr(Address &dest, int val) : Instr(OpCode::CONST), dest_(dest), val_(val) {}
+    ConstInstr(Address &dest, int index, int line, int pos) : Instr(OpCode::CONST, line, pos), dest_(dest), index_(index) {}
 
     auto ToString() const -> std::string override {
-        return dest_ + " = " + Instr::ToString() + " " + std::to_string(val_);
+        return dest_ + " = " + Instr::ToString() + " " + std::to_string(index_);
     }
 };
 

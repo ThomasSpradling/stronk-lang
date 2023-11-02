@@ -32,23 +32,23 @@ private:
     ScannerMode _mode;
     int _line = 1;
     
-    auto MakeToken(TokenType type) -> std::unique_ptr<Token>;
-    template <class T> auto MakeToken(TokenType type, T value) -> std::unique_ptr<ValueToken<T>>;
-    auto MakeTypeToken(PrimitiveType type, int width) -> std::unique_ptr<TypeToken>;
-    auto MakeErrorToken(std::string message) -> std::unique_ptr<ValueToken<std::string>>;
+    auto MakeToken(TokenType type) -> std::shared_ptr<Token>;
+    template <class T> auto MakeToken(TokenType type, T value) -> std::shared_ptr<ValueToken<T>>;
+    auto MakeTypeToken(PrimitiveType type, int width) -> std::shared_ptr<TypeToken>;
+    auto MakeErrorToken(std::string message) -> std::shared_ptr<ValueToken<std::string>>;
 
     auto MatchChar(char to_match) -> bool;
     void SkipWhitespace();
-    auto ScanString() -> std::unique_ptr<Token>;
-    auto ScanNumber() -> std::unique_ptr<Token>;
-    auto CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> std::unique_ptr<Token>;
-    auto CheckTypeKeyword(int start, int length, std::string_view rest, PrimitiveType type, int width) -> std::unique_ptr<Token>;
-    auto ScanIdentifier() -> std::unique_ptr<Token>;
+    auto ScanString() -> std::shared_ptr<Token>;
+    auto ScanNumber() -> std::shared_ptr<Token>;
+    auto CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> std::shared_ptr<Token>;
+    auto CheckTypeKeyword(int start, int length, std::string_view rest, PrimitiveType type, int width) -> std::shared_ptr<Token>;
+    auto ScanIdentifier() -> std::shared_ptr<Token>;
     void PushError(std::string message);
 public:
     Scanner() = default;
     void LoadSource(std::string_view source);
-    auto ScanNextToken() -> std::unique_ptr<Token>;
+    auto ScanNextToken() -> std::shared_ptr<Token>;
 };
 
 #endif // _STRONK_SCANNER_H

@@ -5,7 +5,7 @@
 
 #include "common.h"
 #include "compiler.h"
-// #include "vm.h"
+#include "vm.h"
 
 #define COMPUTE_PERF 0
 
@@ -27,7 +27,7 @@ static void Repl() {
 
     std::string line;
     Compiler compiler;
-    // VirtualMachine vm;
+    VirtualMachine vm;
 
     for (;;) {
         std::cout << "> ";
@@ -41,9 +41,11 @@ static void Repl() {
             exit(65); // compile time error
         }
 
-        // if (vm.Interpret(compiler.GetBytecode())) {
-        //     exit(70); // runtime error
-        // }
+        Bytecode bytecode = compiler.GetBytecode();
+
+        if (vm.Interpret(bytecode)) {
+            exit(70); // runtime error
+        }
     }
 }
 
@@ -64,15 +66,17 @@ static void RunFile(std::string_view path) {
     std::string source = buffer.str();
 
     Compiler compiler;
-    // VirtualMachine vm;
+    VirtualMachine vm;
 
     if (compiler.Compile(source)) {
         exit(65); // compile time error
     }
 
-    // if (vm.Interpret(compiler.GetBytecode())) {
-    //     exit(70); // runtime error
-    // }
+    Bytecode bytecode = compiler.GetBytecode();
+
+    if (vm.Interpret(bytecode)) {
+        exit(70); // runtime error
+    }
 }
 
 auto main(int argc, const char *argv[]) -> int {

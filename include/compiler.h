@@ -2,7 +2,6 @@
 #define _STRONK_COMPILER_H
 
 #include <string>
-#include "chunk.h"
 #include "common.h"
 #include "scanner.h"
 #include "parser.h"

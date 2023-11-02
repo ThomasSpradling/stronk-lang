@@ -47,7 +47,7 @@ void Scanner::LoadSource(std::string_view source) {
 }
 
 // Scans next token found in buffer.
-auto Scanner::ScanNextToken() -> std::unique_ptr<Token> {
+auto Scanner::ScanNextToken() -> std::shared_ptr<Token> {
     // String mode should leave whitespace alone.
     if (_mode.state != ScannerState::STRING) {
         SkipWhitespace();
@@ -177,7 +177,7 @@ void Scanner::SkipWhitespace() {
 }
 
 // Assumes in string mode. Gets next token found in string.
-auto Scanner::ScanString() -> std::unique_ptr<Token> {
+auto Scanner::ScanString() -> std::shared_ptr<Token> {
     std::ostringstream oss;
     for (;;) {
         if (_current == _source.end()) {
@@ -219,7 +219,7 @@ auto Scanner::ScanString() -> std::unique_ptr<Token> {
 }
 
 // Scans through numbers.
-auto Scanner::ScanNumber() -> std::unique_ptr<Token> {
+auto Scanner::ScanNumber() -> std::shared_ptr<Token> {
     int value = 0;
     _current--;
 
@@ -256,7 +256,7 @@ auto Scanner::ScanNumber() -> std::unique_ptr<Token> {
 }
 
 // Helper function for scanning identifier tokens that are keywords.
-auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> std::unique_ptr<Token> {
+auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> std::shared_ptr<Token> {
     std::string_view::iterator start_iter = _start + start;
     std::string_view view(start_iter, length);
     if (_current - _start == start + length && view == rest) {
@@ -267,7 +267,7 @@ auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenTy
 }
 
 // Helper function for scanning identifier tokens that are type keywords.
-auto Scanner::CheckTypeKeyword(int start, int length, std::string_view rest, PrimitiveType type, int width) -> std::unique_ptr<Token> {
+auto Scanner::CheckTypeKeyword(int start, int length, std::string_view rest, PrimitiveType type, int width) -> std::shared_ptr<Token> {
     std::string_view::iterator start_iter = _start + start;
     std::string_view view(start_iter, length);
     if (_current - _start == start + length && view == rest) {
@@ -279,7 +279,7 @@ auto Scanner::CheckTypeKeyword(int start, int length, std::string_view rest, Pri
 
 // Scans identifier, which begin with letter (or underscore) and
 // with all other characters being letters, underscores, or numbers.
-auto Scanner::ScanIdentifier() -> std::unique_ptr<Token> {
+auto Scanner::ScanIdentifier() -> std::shared_ptr<Token> {
     std::ostringstream oss;
     _current--;
     while (isalpha(*_current) != 0) {
@@ -301,23 +301,23 @@ auto Scanner::ScanIdentifier() -> std::unique_ptr<Token> {
 }
 
 // Helper method to build a token with `type`.
-auto Scanner::MakeToken(TokenType type) -> std::unique_ptr<Token> {
+auto Scanner::MakeToken(TokenType type) -> std::shared_ptr<Token> {
     return std::make_unique<Token>(type, 0, _line);
 }
 
 // Helper method to build a value token: One that contains additional value
 // information.
 template <class T>
-auto Scanner::MakeToken(TokenType type, T value) -> std::unique_ptr<ValueToken<T>> {
+auto Scanner::MakeToken(TokenType type, T value) -> std::shared_ptr<ValueToken<T>> {
     return std::make_unique<ValueToken<T>>(type, 0, _line, value);
 }
 
 // Helper method to build a type token, One with two pieces of information -- name and width.
-auto Scanner::MakeTypeToken(PrimitiveType type, int width) -> std::unique_ptr<TypeToken> {
+auto Scanner::MakeTypeToken(PrimitiveType type, int width) -> std::shared_ptr<TypeToken> {
     return std::make_unique<TypeToken>(TokenType::PRIMITIVE, 0, _line, type, width);
 }
 
 // Helper method to build a token with error message.
-auto Scanner::MakeErrorToken(std::string message) -> std::unique_ptr<ValueToken<std::string>> {
+auto Scanner::MakeErrorToken(std::string message) -> std::shared_ptr<ValueToken<std::string>> {
     return std::make_unique<ValueToken<std::string>>(TokenType::ERROR, 0, _line, std::move(message));
 }

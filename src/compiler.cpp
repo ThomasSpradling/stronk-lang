@@ -13,7 +13,7 @@ auto Compiler::Compile(std::string_view source) -> bool {
     #endif
 
     for (;;) {
-        std::unique_ptr<Token> token = scanner.ScanNextToken();
+        std::shared_ptr<Token> token = scanner.ScanNextToken();
         auto token_line = token->line_;
         auto token_type = token->type_;
         std::string token_form = token->ToString();
@@ -38,6 +38,7 @@ auto Compiler::Compile(std::string_view source) -> bool {
     parser.Parse();
 
     bytecode = parser.GetBytecode();
+    
     return true;
 }
 

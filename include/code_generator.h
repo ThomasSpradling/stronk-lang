@@ -3,17 +3,18 @@
 #include "instruction.h"
 #include "value.h"
 
-using Bytecode = std::vector<Instr>;
+using Bytecode = std::vector<std::shared_ptr<Instr>>;
 using ValueArray = std::vector<Value>;
 
 class CodeGenerator {
 private:
     Bytecode bytecode_;
     ValueArray constant_pool_;
+    auto AddConstant(const Value &val) -> int;
 public:
     CodeGenerator() = default;
-    void AddInstruction(const Instr &instr);
-    void AddConstantInstruction(Value val);
+    void AddInstruction(const std::shared_ptr<Instr> &instr);
+    void AddConstantInstruction(Address &dest, const Value &value, int line, int pos);
     auto Size() -> size_t;
     void DissasembleCode();
     auto GetCode() -> Bytecode;
