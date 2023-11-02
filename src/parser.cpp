@@ -10,10 +10,11 @@ void Parser::AddToken(std::shared_ptr<Token> token) {
 void Parser::Parse() {
     current = tokens.begin();
     previous = tokens.end();
-    ParseExpression();
+    ParseTerm();
 }
 
-auto Parser::ParseExpression() -> Address {
+// Grammar: term -> factor ( (+ | -) factor )*
+auto Parser::ParseTerm() -> Address {
     Address dest = ParseFactor();
     for (;;) {
         Token &tok = **current;
@@ -47,6 +48,7 @@ auto Parser::ParseExpression() -> Address {
     return dest;
 }
 
+// Grammar: unary -> term ( (* | /) unary )*
 auto Parser::ParseFactor() -> Address {
     Address dest = ParseUnary();
     for (;;) {
@@ -60,7 +62,7 @@ auto Parser::ParseFactor() -> Address {
             case TokenType::SLASH:
                 StepForward();
                 a = dest;
-                b = ParseFactor();
+                b = ParseUnary();
 
                 dest = num_gen.GenerateTemp();
 
@@ -69,7 +71,7 @@ auto Parser::ParseFactor() -> Address {
             case TokenType::STAR:
                 StepForward();
                 a = dest;
-                b = ParseFactor();
+                b = ParseUnary();
 
                 dest = num_gen.GenerateTemp();
 
@@ -82,6 +84,7 @@ auto Parser::ParseFactor() -> Address {
     return dest;
 }
 
+// Grammar: unary -> - unary | primary
 auto Parser::ParseUnary() -> Address {
     TokenType op = current->get()->type_;
 
@@ -95,7 +98,7 @@ auto Parser::ParseUnary() -> Address {
     return ParsePrimary();
 }
 
-
+// Grammar: primary -> TRUE | FALSE | NIL | INT | REAL | IDENTIFIER
 auto Parser::ParsePrimary() -> Address {
     TokenType a = current->get()->type_;
     StepForward();

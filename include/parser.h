@@ -22,7 +22,7 @@ private:
     void StepIfMatch(TokenType type, std::string_view message);
     void ErrorAt(std::shared_ptr<Token> &token, std::string_view message);
 
-    auto ParseExpression() -> Address;
+    auto ParseTerm() -> Address;
     auto ParseFactor() -> Address;
     auto ParseUnary() -> Address;
     auto ParsePrimary() -> Address;
