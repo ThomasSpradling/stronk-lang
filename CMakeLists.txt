@@ -6,6 +6,9 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 project(StronkLang)
 
+set(BASE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
+configure_file(config.h.in ${PROJECT_SOURCE_DIR}/src/include/config.h)
+
 if(NOT CMAKE_BUILD_TYPE)
     message(STATUS "Setting build type to `Debug` as a default.")
     set(CMAKE_BUILD_TYPE "Debug")
@@ -53,7 +56,7 @@ set(STRONK_SRC_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/src/include)
 set(STRONK_TEST_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/test/include)
 set(STRONK_THIRD_PARTY_INCLUDE_DIR ${PROJECT_SOURCE_DIR}/third_party)
 
-include_directories(${STRONK_SRC_INCLUDE_DIR} ${STRONK_TEST_INCLUDE_DIR} ${STRONK_THIRD_PARTY_INCLUDE_DIR})
+include_directories(${BASE_DIR} ${STRONK_SRC_INCLUDE_DIR} ${STRONK_TEST_INCLUDE_DIR} ${STRONK_THIRD_PARTY_INCLUDE_DIR})
 
 add_subdirectory(third_party)
 add_subdirectory(src)

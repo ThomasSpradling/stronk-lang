@@ -4,10 +4,11 @@
 #include <filesystem>
 #include "common/utils.h"
 #include "frontend/scanner.h"
+#include "config.h" // Generated file from CMakeLists.txt. Make sure to build that first!
 
 auto ReadTokensFromSource(const std::string &source) -> std::vector<std::shared_ptr<Token>> {
-    std::string base = std::filesystem::current_path();
-    std::string filepath = base + "/../test/mock/" + source;
+    std::string base = BASE_DIR;
+    std::string filepath = base + "/test/mock/" + source;
     Scanner scanner;
     std::ifstream istream(filepath);
 

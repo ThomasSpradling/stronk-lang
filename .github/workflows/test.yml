@@ -22,7 +22,7 @@ jobs:
         mkdir build
         cd build
         cmake ..
-        make TestExecutable
+        make 
 
     - name: Run tests
       run: ./build/bin/TestExecutable
