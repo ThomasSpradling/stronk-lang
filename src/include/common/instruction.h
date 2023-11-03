@@ -158,4 +158,6 @@ struct ConstInstr : public Instr {
     }
 };
 
+bool operator==(const std::shared_ptr<Instr> &instr1, const std::shared_ptr<Instr> &instr2);
+
 #endif // _STRONK_INSTRUCTION_H

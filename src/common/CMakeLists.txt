@@ -4,6 +4,7 @@ add_library(
     number_generator.cpp
     utils.cpp
     value.cpp
+    instruction.cpp
 )
 
 set(ALL_OBJECT_FILES

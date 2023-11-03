@@ -1,23 +1,27 @@
 #include "frontend/token.h"
 
-bool operator==(const Token &lhs, const Token &rhs) {
-    return lhs.type_ == rhs.type_ &&
-           lhs.position_ == rhs.position_ &&
-           lhs.line_ == rhs.line_;
+auto operator==(const std::shared_ptr<Token> &token1, const std::shared_ptr<Token> &token2) -> bool {
+    if (token1->type_ == token2->type_ &&
+        token1->position_ == token2->position_ &&
+        token1->line_ == token2->line_) {
+        if (auto valueToken1 = std::dynamic_pointer_cast<ValueToken<int>>(token1)) {
+            auto valueToken2 = std::dynamic_pointer_cast<ValueToken<int>>(token2);
+            return valueToken2 && valueToken1->value_ == valueToken2->value_;
+        } else if (auto valueToken1 = std::dynamic_pointer_cast<ValueToken<float>>(token1)) {
+            auto valueToken2 = std::dynamic_pointer_cast<ValueToken<float>>(token2);
+            return valueToken2 && valueToken1->value_ == valueToken2->value_;
+        } else if (auto valueToken1 = std::dynamic_pointer_cast<ValueToken<std::string>>(token1)) {
+            auto valueToken2 = std::dynamic_pointer_cast<ValueToken<std::string>>(token2);
+            return valueToken2 && valueToken1->value_ == valueToken2->value_;
+        } else if (auto valueToken1 = std::dynamic_pointer_cast<ValueToken<char>>(token1)) {
+            auto valueToken2 = std::dynamic_pointer_cast<ValueToken<char>>(token2);
+            return valueToken2 && valueToken1->value_ == valueToken2->value_;
+        } else if (auto typeToken1 = std::dynamic_pointer_cast<TypeToken>(token1)) {
+            auto typeToken2 = std::dynamic_pointer_cast<TypeToken>(token2);
+            return typeToken2 && typeToken1->value_ == typeToken2->value_ && typeToken1->width_ == typeToken2->width_;
+        } else {
+            return true;
+        }
+    }
+    return false;
 }
-
-template<class T>
-auto operator==(const ValueToken<T> &lhs, const ValueToken<T> &rhs) -> bool {
-    return static_cast<const Token &>(lhs) == static_cast<const Token &>(rhs) &&
-           lhs.value_ == rhs.value_;
-}
-
-auto operator==(const TypeToken &lhs, const TypeToken &rhs) -> bool {
-    return static_cast<const ValueToken<PrimitiveType> &>(lhs) == static_cast<const ValueToken<PrimitiveType> &>(rhs) &&
-           lhs.width_ == rhs.width_;
-}
-
-template auto operator==(const ValueToken<int>& lhs, const ValueToken<int>& rhs) -> bool;
-template auto operator==(const ValueToken<std::string>& lhs, const ValueToken<std::string>& rhs) -> bool;
-template auto operator==(const ValueToken<float>& lhs, const ValueToken<float>& rhs) -> bool;
-template auto operator==(const ValueToken<char>& lhs, const ValueToken<char>& rhs) -> bool;

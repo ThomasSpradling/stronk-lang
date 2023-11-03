@@ -11,6 +11,9 @@ void Parser::Parse() {
     current_ = tokens_.begin();
     previous_ = tokens_.end();
     ParseTerm();
+    if (current_->get()->type_ != TokenType::TOKEN_EOF) {
+        ErrorAt(*current_, "Expected end of file.");
+    }
 }
 
 // Grammar: term -> factor ( (+ | -) factor )*
@@ -57,6 +60,7 @@ auto Parser::ParseFactor() -> Address {
         Address b;
 
         switch (tok.type_) {
+            case TokenType::TOKEN_EOF: return dest;
             case TokenType::SLASH:
                 StepForward();
                 a = dest;
@@ -99,7 +103,6 @@ auto Parser::ParseUnary() -> Address {
 // Grammar: primary -> TRUE | FALSE | NIL | INT | REAL | IDENTIFIER
 auto Parser::ParsePrimary() -> Address {
     TokenType a = current_->get()->type_;
-    StepForward();
 
     Address dest;
     ValueToken<std::string> *b;
@@ -108,10 +111,12 @@ auto Parser::ParsePrimary() -> Address {
     ValueToken<int> *value_int;
 
     switch (a) {
+        case TokenType::TOKEN_EOF: return dest;
         case TokenType::TRUE: return EmitConstInstruction(BoolValue{true});
         case TokenType::FALSE:  return EmitConstInstruction(BoolValue{false});
         case TokenType::NIL: return EmitConstInstruction(NilValue{});
         case TokenType::REAL:
+            StepForward();
             value_float = dynamic_cast<ValueToken<float> *>(previous_->get());
             if (value_float == nullptr) {
                 ErrorAt(*previous_, "Expected float.");
@@ -120,6 +125,7 @@ auto Parser::ParsePrimary() -> Address {
             }
             break;
         case TokenType::INT:
+            StepForward();
             value_int = dynamic_cast<ValueToken<int> *>(previous_->get());
             if (value_int == nullptr) {
                  ErrorAt(*previous_, "Expected float.");
@@ -128,6 +134,7 @@ auto Parser::ParsePrimary() -> Address {
             }
             break;
         case TokenType::IDENTIFIER:
+            StepForward();
             b = dynamic_cast<ValueToken<std::string> *>(previous_->get());
             if (b == nullptr) {
                 ErrorAt(*previous_, "Unexpected token.");
