@@ -3,8 +3,8 @@
 
 #include <string>
 #include "common/common.h"
-#include "scanner.h"
-#include "parser.h"
+#include "frontend/scanner.h"
+#include "frontend/parser.h"
 
 // Compiles tokens provided by Scanner into
 // bytecode.

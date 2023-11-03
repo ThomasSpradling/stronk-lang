@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "frontend/token.h"
 #include "common/utils.h"
-#include "frontend/compiler.h"
+#include "compiler/compiler.h"
 
 TEST(BasicOperationsTests, SimpleInstruction) {
     auto token_result = ReadTokensFromSource("basic_operations/one_instruction.stronk");

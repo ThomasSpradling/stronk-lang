@@ -1,6 +1,7 @@
 add_subdirectory(backend)
 add_subdirectory(common)
 add_subdirectory(frontend)
+add_subdirectory(compiler)
 
 add_library(stronk STATIC ${ALL_OBJECT_FILES})
 
@@ -8,6 +9,7 @@ set(STRONKS_LIBS
     stronk_backend
     stronk_common
     stronk_frontend
+    stronk_compiler
     )
 
 target_link_libraries(stronk ${STRONK_LIBS})

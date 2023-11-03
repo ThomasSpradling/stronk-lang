@@ -1,7 +1,7 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include "frontend/compiler.h"
+#include "compiler/compiler.h"
 
 // Compiles the source after scanning it.
 auto Compiler::Compile(std::string_view source) -> bool {

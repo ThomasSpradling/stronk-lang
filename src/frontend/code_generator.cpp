@@ -8,8 +8,8 @@ void CodeGenerator::AddInstruction(const std::shared_ptr<Instr> &instr) {
 
 // Utility method for adding value to the constant
 // pool and an instruction that references that constant.
-void CodeGenerator::AddConstantInstruction(Address &dest, const Value &value, int line, int pos) {
-    AddInstruction(std::make_shared<ConstInstr>(dest, AddConstant(value), line, pos));
+void CodeGenerator::AddConstantInstruction(Address &dest, const ConstantPool::ConstantValue &value, int line, int pos) {
+    AddInstruction(std::make_shared<ConstInstr>(dest, constant_pool_.AddConstant(value), line, pos));
 }
 
 // Gets the number of instructions.
@@ -27,10 +27,4 @@ void CodeGenerator::DissasembleCode() {
 // Bytecode getter method.
 auto CodeGenerator::GetCode() -> Bytecode {
     return bytecode_;
-}
-
-// Adds a constant to constant pool and returns its index.
-auto CodeGenerator::AddConstant(const Value &val) -> int {
-    constant_pool_.push_back(val);
-    return constant_pool_.size() - 1;
 }

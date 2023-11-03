@@ -1,7 +1,7 @@
 #include <vector>
 #include <string>
 #include "frontend/token.h"
-#include "frontend/compiler.h"
+#include "compiler/compiler.h"
 #include "common/instruction.h"
 
 /* Utility functions used in source and primarily for testing. */

@@ -2,7 +2,6 @@ add_library(
     stronk_frontend
     OBJECT
     code_generator.cpp
-    compiler.cpp
     parser.cpp
     scanner.cpp
     token.cpp

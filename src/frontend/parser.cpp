@@ -112,16 +112,16 @@ auto Parser::ParsePrimary() -> Address {
 
     switch (a) {
         case TokenType::TOKEN_EOF: return dest;
-        case TokenType::TRUE: return EmitConstInstruction(BoolValue{true});
-        case TokenType::FALSE:  return EmitConstInstruction(BoolValue{false});
-        case TokenType::NIL: return EmitConstInstruction(NilValue{});
+        case TokenType::TRUE: return EmitConstInstruction(true);
+        case TokenType::FALSE:  return EmitConstInstruction(false);
+        case TokenType::NIL: return EmitConstInstruction(nullptr);
         case TokenType::REAL:
             StepForward();
             value_float = dynamic_cast<ValueToken<float> *>(previous_->get());
             if (value_float == nullptr) {
                 ErrorAt(*previous_, "Expected float.");
             } else {
-                return EmitConstInstruction(RealValue(value_float->value_));
+                return EmitConstInstruction(value_float->value_);
             }
             break;
         case TokenType::INT:
@@ -130,7 +130,7 @@ auto Parser::ParsePrimary() -> Address {
             if (value_int == nullptr) {
                  ErrorAt(*previous_, "Expected float.");
             } else {
-                return EmitConstInstruction(RealValue(value_int->value_));
+                return EmitConstInstruction(value_int->value_);
             }
             break;
         case TokenType::IDENTIFIER:
@@ -156,7 +156,7 @@ void Parser::EmitInstruction(Address &dest, OpCode op, Args... args) {
     cg_.AddInstruction(std::make_shared<PureInstr>(op, dest, args_vec, line, position));
 }
 
-auto Parser::EmitConstInstruction(const Value &val) -> Address {
+auto Parser::EmitConstInstruction(const ConstantPool::ConstantValue &val) -> Address {
     Address dest = num_gen_.GenerateTemp();
     int line = previous_->get()->line_;
     int position = previous_->get()->position_;

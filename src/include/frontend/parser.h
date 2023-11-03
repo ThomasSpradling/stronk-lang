@@ -29,7 +29,7 @@ private:
     auto ParsePrimary() -> Address;
 
     template <typename... Args> void EmitInstruction(Address &dest, OpCode op, Args... args);
-    auto EmitConstInstruction(const Value &val) -> Address;
+    auto EmitConstInstruction(const ConstantPool::ConstantValue &val) -> Address;
 public:
     Parser() = default;
     void AddToken(std::shared_ptr<Token> token);

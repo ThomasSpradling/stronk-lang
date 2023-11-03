@@ -1,7 +1,7 @@
 #include <gtest/gtest.h>
 #include "frontend/token.h"
 #include "common/utils.h"
-#include "frontend/compiler.h"
+#include "compiler/compiler.h"
 
 TEST(CommentsTest, SingleLineComment) {
     // Single line comment
