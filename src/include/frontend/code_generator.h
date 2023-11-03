@@ -1,7 +1,7 @@
 #ifndef _STRONK_CODE_GENERATOR_H
 #define _STRONK_CODE_GENERATOR_H
-#include "instruction.h"
-#include "value.h"
+#include "common/instruction.h"
+#include "common/value.h"
 
 using Bytecode = std::vector<std::shared_ptr<Instr>>;
 using ValueArray = std::vector<Value>;

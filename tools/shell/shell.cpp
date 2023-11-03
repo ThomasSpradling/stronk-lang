@@ -3,9 +3,9 @@
 #include <fstream>
 #include <sstream>
 
-#include "common.h"
-#include "compiler.h"
-#include "vm.h"
+#include "common/common.h"
+#include "frontend/compiler.h"
+#include "backend/vm.h"
 
 #define COMPUTE_PERF 0
 

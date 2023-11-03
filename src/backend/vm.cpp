@@ -1,4 +1,4 @@
-#include "vm.h"
+#include "backend/vm.h"
 
 // Interprets the given bytecode.
 auto VirtualMachine::Interpret(Bytecode &bytecode) -> bool {

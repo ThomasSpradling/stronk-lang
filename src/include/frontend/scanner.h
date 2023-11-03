@@ -4,7 +4,7 @@
 #include <string>
 #include <sstream>
 #include <unordered_map>
-#include "common.h"
+#include "common/common.h"
 #include "token.h"
 
 // The state of the scanner:
@@ -16,21 +16,21 @@ enum class ScannerState {
 };
 
 struct ScannerMode {
-    ScannerState state = ScannerState::NORMAL;
-    int str_depth = 0;
+    ScannerState state_ = ScannerState::NORMAL;
+    int str_depth_ = 0;
 };
 
 // Lexical analysis over the source to allow for
 // compiling.
 class Scanner {
 private:
-    std::ostringstream buffer;
+    std::ostringstream buffer_;
 
-    std::string_view _source;
-    std::string_view::iterator _start;
-    std::string_view::iterator _current;
-    ScannerMode _mode;
-    int _line = 1;
+    std::string_view source_;
+    std::string_view::iterator start_;
+    std::string_view::iterator current_;
+    ScannerMode mode_;
+    int line_ = 1;
     
     auto MakeToken(TokenType type) -> std::shared_ptr<Token>;
     template <class T> auto MakeToken(TokenType type, T value) -> std::shared_ptr<ValueToken<T>>;
@@ -44,7 +44,6 @@ private:
     auto CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> std::shared_ptr<Token>;
     auto CheckTypeKeyword(int start, int length, std::string_view rest, PrimitiveType type, int width) -> std::shared_ptr<Token>;
     auto ScanIdentifier() -> std::shared_ptr<Token>;
-    void PushError(std::string message);
 public:
     Scanner() = default;
     void LoadSource(std::string_view source);

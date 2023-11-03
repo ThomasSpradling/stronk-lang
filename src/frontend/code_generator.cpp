@@ -1,4 +1,4 @@
-#include "code_generator.h"
+#include "frontend/code_generator.h"
 #include <iostream>
 
 // Adds an instruction.

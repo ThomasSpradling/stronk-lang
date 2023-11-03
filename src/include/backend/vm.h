@@ -1,7 +1,7 @@
 #ifndef _STRONK_VM_H
 #define _STRONK_VM_H
 
-#include "code_generator.h"
+#include "frontend/code_generator.h"
 
 class VirtualMachine {
 private:

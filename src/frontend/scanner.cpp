@@ -1,6 +1,6 @@
 #include <iostream>
 #include <sstream>
-#include "scanner.h"
+#include "frontend/scanner.h"
 
 /***** Nonmember Functions ***/
 
@@ -40,23 +40,23 @@ std::unordered_map<std::string, std::pair<PrimitiveType, int>> reserved_typename
 
 // Loads source into buffer.
 void Scanner::LoadSource(std::string_view source) {
-    _source = source;
+    source_ = source;
 
-    _start = _source.begin();
-    _current = _source.begin();
+    start_ = source_.begin();
+    current_ = source_.begin();
 }
 
 // Scans next token found in buffer.
 auto Scanner::ScanNextToken() -> std::shared_ptr<Token> {
     // String mode should leave whitespace alone.
-    if (_mode.state != ScannerState::STRING) {
+    if (mode_.state_ != ScannerState::STRING) {
         SkipWhitespace();
     }
-    _start = _current;
+    start_ = current_;
 
-    if (_current == _source.end()) {
-        if (_mode.str_depth != 0) {
-            _mode.str_depth = 0;
+    if (current_ == source_.end()) {
+        if (mode_.str_depth_ != 0) {
+            mode_.str_depth_ = 0;
             return MakeErrorToken("Unterminated string.");
         }
         return MakeToken(TokenType::TOKEN_EOF);
@@ -64,12 +64,12 @@ auto Scanner::ScanNextToken() -> std::shared_ptr<Token> {
 
     // String mode activates while scanning within
     // a string.
-    if (_mode.state == ScannerState::STRING) {
+    if (mode_.state_ == ScannerState::STRING) {
         return ScanString();
     }
 
     // Get next character and move forward.
-    char c = *_current++;
+    char c = *current_++;
 
     if (IsAlpha(c)) {
         return ScanIdentifier();
@@ -85,8 +85,8 @@ auto Scanner::ScanNextToken() -> std::shared_ptr<Token> {
         case ']': return MakeToken(TokenType::RIGHT_BRACKET);
         case '{': return MakeToken(TokenType::LEFT_BRACE);
         case '}':
-            if (_mode.str_depth > 0) {
-                _mode.state = ScannerState::STRING;
+            if (mode_.str_depth_ > 0) {
+                mode_.state_ = ScannerState::STRING;
             }
             return MakeToken(TokenType::RIGHT_BRACE);
         case ';': return MakeToken(TokenType::SEMICOLON);
@@ -105,8 +105,8 @@ auto Scanner::ScanNextToken() -> std::shared_ptr<Token> {
         case '>': return MakeToken(
             MatchChar('=') ? TokenType::GREATER_EQUAL : TokenType::GREATER);
         case '"':
-            _mode.str_depth++;
-            _mode.state = ScannerState::STRING;
+            mode_.str_depth_++;
+            mode_.state_ = ScannerState::STRING;
             return MakeToken(TokenType::QUOTE);
     }
 
@@ -117,10 +117,10 @@ auto Scanner::ScanNextToken() -> std::shared_ptr<Token> {
 // Utility mathod to determine whether the current character
 // matches the passed in character.
 auto Scanner::MatchChar(char to_match) -> bool {
-    if (_current == _source.end() || *_current != to_match) {
+    if (current_ == source_.end() || *current_ != to_match) {
         return false;
     }
-    _current++;
+    current_++;
     return true;
 }
 
@@ -128,41 +128,41 @@ auto Scanner::MatchChar(char to_match) -> bool {
 // current character.
 void Scanner::SkipWhitespace() {
     for (;;) {
-        switch (*_current) {
+        switch (*current_) {
             case ' ':
             case '\r':
             case '\t':
-                _current++;
+                current_++;
                 break;
             case '\n':
-                _line++;
-                _current++;
+                line_++;
+                current_++;
                 break;
             case '/':
-                if (*(_current + 1) == '/') {
+                if (*(current_ + 1) == '/') {
                     // Comment goes until end of the line.
-                    while (*_current != '\n' && _current != _source.end()) {
-                        _current++;
+                    while (*current_ != '\n' && current_ != source_.end()) {
+                        current_++;
                     }
-                } else if (*(_current + 1) == '*') {
+                } else if (*(current_ + 1) == '*') {
                     // Multiline comment
-                    _current += 1;
+                    current_ += 1;
                     int depth = 1; // Keep track of depth of nested comment
-                    while (_current != _source.end()) {
+                    while (current_ != source_.end()) {
                         if (depth == 0) {
-                            _current++;
+                            current_++;
                             break;
                         }
-                        if (*_current == '\n') {
-                            _line++;
+                        if (*current_ == '\n') {
+                            line_++;
                         }
-                        _current++;
-                        if (*_current == '/' && *(_current + 1) == '*') {
-                            _current++;
+                        current_++;
+                        if (*current_ == '/' && *(current_ + 1) == '*') {
+                            current_++;
                             depth++;
                         }
-                        if (*_current == '*' && *(_current + 1) == '/') {
-                            _current++;
+                        if (*current_ == '*' && *(current_ + 1) == '/') {
+                            current_++;
                             depth--;
                         }
                     }
@@ -180,37 +180,37 @@ void Scanner::SkipWhitespace() {
 auto Scanner::ScanString() -> std::shared_ptr<Token> {
     std::ostringstream oss;
     for (;;) {
-        if (_current == _source.end()) {
+        if (current_ == source_.end()) {
             return MakeErrorToken("Unterminated string.");
         }
 
-        char c = *_current++;
+        char c = *current_++;
 
         switch (c) {
             case '\\':
                 // Escaped characters are their own tokens.
-                _current++;
-                return MakeToken<char>(TokenType::ESCAPED, *_current);
+                current_++;
+                return MakeToken<char>(TokenType::ESCAPED, *current_);
             case '"':
-                _mode.state = ScannerState::NORMAL;
-                _mode.str_depth--;
+                mode_.state_ = ScannerState::NORMAL;
+                mode_.str_depth_--;
                 return MakeToken(TokenType::QUOTE);
             case '$':
                 if (MatchChar('{')) {
-                    _mode.state = ScannerState::NORMAL;
+                    mode_.state_ = ScannerState::NORMAL;
                     return MakeToken(TokenType::DOLLAR_BRACE);
                 }
             case '\n':
-                _line++;
+                line_++;
                 break;
             default:
-                oss << *(_current - 1);
+                oss << *(current_ - 1);
                 // If the next characters us to cut string.
-                if (_current == _source.end() || *_current == '"' || *_current  == '\\') {
+                if (current_ == source_.end() || *current_ == '"' || *current_  == '\\') {
                     std::string value = oss.str();
                     return MakeToken<std::string>(TokenType::TEXT, value);
                 }
-                if (_current + 1 == _source.end() || *_current == '$' && *(_current + 1) == '{') {
+                if (current_ + 1 == source_.end() || (*current_ == '$' && *(current_ + 1) == '{')) {
                     std::string value = oss.str();
                     return MakeToken<std::string>(TokenType::TEXT, value);
                 }
@@ -221,31 +221,31 @@ auto Scanner::ScanString() -> std::shared_ptr<Token> {
 // Scans through numbers.
 auto Scanner::ScanNumber() -> std::shared_ptr<Token> {
     int value = 0;
-    _current--;
+    current_--;
 
-    if (isdigit(*_current) == 0) {
-        _current++;
+    if (isdigit(*current_) == 0) {
+        current_++;
         return MakeErrorToken("Expected a digit.");
     }
 
-    while (isdigit(*_current) != 0) {
-        value = 10 * value + *_current - '0';
-        _current++;
+    while (isdigit(*current_) != 0) {
+        value = 10 * value + *current_ - '0';
+        current_++;
     }
 
-    if (*_current != '.') {
+    if (*current_ != '.') {
         return MakeToken<int>(TokenType::INT, value);
     }
 
-    if (isdigit(*(_current + 1)) != 0) {
-        _current++;
+    if (isdigit(*(current_ + 1)) != 0) {
+        current_++;
 
         float float_value = value;
         float d = 10;
 
-        while (isdigit(*_current) != 0) {
-            _current++;
-            float_value += (*_current - '0') / d;
+        while (isdigit(*current_) != 0) {
+            current_++;
+            float_value += (*current_ - '0') / d;
             d *= 10;
         }
 
@@ -257,9 +257,9 @@ auto Scanner::ScanNumber() -> std::shared_ptr<Token> {
 
 // Helper function for scanning identifier tokens that are keywords.
 auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenType type) -> std::shared_ptr<Token> {
-    std::string_view::iterator start_iter = _start + start;
+    std::string_view::iterator start_iter = start_ + start;
     std::string_view view(start_iter, length);
-    if (_current - _start == start + length && view == rest) {
+    if (current_ - start_ == start + length && view == rest) {
         return MakeToken(type);
     }
 
@@ -268,9 +268,9 @@ auto Scanner::CheckKeyword(int start, int length, std::string_view rest, TokenTy
 
 // Helper function for scanning identifier tokens that are type keywords.
 auto Scanner::CheckTypeKeyword(int start, int length, std::string_view rest, PrimitiveType type, int width) -> std::shared_ptr<Token> {
-    std::string_view::iterator start_iter = _start + start;
+    std::string_view::iterator start_iter = start_ + start;
     std::string_view view(start_iter, length);
-    if (_current - _start == start + length && view == rest) {
+    if (current_ - start_ == start + length && view == rest) {
         return MakeTypeToken(type, width);
     }
 
@@ -281,10 +281,10 @@ auto Scanner::CheckTypeKeyword(int start, int length, std::string_view rest, Pri
 // with all other characters being letters, underscores, or numbers.
 auto Scanner::ScanIdentifier() -> std::shared_ptr<Token> {
     std::ostringstream oss;
-    _current--;
-    while (isalpha(*_current) != 0) {
-        oss << *_current;
-        _current++;
+    current_--;
+    while (isalpha(*current_) != 0) {
+        oss << *current_;
+        current_++;
     }
     std::string id = oss.str();
 
@@ -302,22 +302,22 @@ auto Scanner::ScanIdentifier() -> std::shared_ptr<Token> {
 
 // Helper method to build a token with `type`.
 auto Scanner::MakeToken(TokenType type) -> std::shared_ptr<Token> {
-    return std::make_unique<Token>(type, 0, _line);
+    return std::make_unique<Token>(type, 0, line_);
 }
 
 // Helper method to build a value token: One that contains additional value
 // information.
 template <class T>
 auto Scanner::MakeToken(TokenType type, T value) -> std::shared_ptr<ValueToken<T>> {
-    return std::make_unique<ValueToken<T>>(type, 0, _line, value);
+    return std::make_unique<ValueToken<T>>(type, 0, line_, value);
 }
 
 // Helper method to build a type token, One with two pieces of information -- name and width.
 auto Scanner::MakeTypeToken(PrimitiveType type, int width) -> std::shared_ptr<TypeToken> {
-    return std::make_unique<TypeToken>(TokenType::PRIMITIVE, 0, _line, type, width);
+    return std::make_unique<TypeToken>(TokenType::PRIMITIVE, 0, line_, type, width);
 }
 
 // Helper method to build a token with error message.
 auto Scanner::MakeErrorToken(std::string message) -> std::shared_ptr<ValueToken<std::string>> {
-    return std::make_unique<ValueToken<std::string>>(TokenType::ERROR, 0, _line, std::move(message));
+    return std::make_unique<ValueToken<std::string>>(TokenType::ERROR, 0, line_, std::move(message));
 }

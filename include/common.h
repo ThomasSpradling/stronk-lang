@@ -1,9 +1,0 @@
-#ifndef _STRONK_COMMON_H
-#define _STRONK_COMMON_H
-
-#define DEBUG_TRACE_EXECUTION 1
-
-#define _STRONK_INT_WIDTH 4
-#define _STRONK_FLOAT_WIDTH 8
-
-#endif // _STRONK_COMMON_H

@@ -1,23 +1,27 @@
 #include <iomanip>
 #include <iostream>
 #include <string>
-#include "compiler.h"
+#include "frontend/compiler.h"
 
 // Compiles the source after scanning it.
 auto Compiler::Compile(std::string_view source) -> bool {
-    scanner.LoadSource(source);
+    scanner_.LoadSource(source);
     std::vector<Token> tokens;
     
-    #if DEBUG_TRACE_EXECUTION
+    #ifdef DEBUG_TRACE_EXECUTION
     int line = -1;
     #endif
 
     for (;;) {
-        std::shared_ptr<Token> token = scanner.ScanNextToken();
+        std::shared_ptr<Token> token = scanner_.ScanNextToken();
+
+        #if DEBUG_TRACE_EXECUTION
         auto token_line = token->line_;
+        #endif
+        
         auto token_type = token->type_;
         std::string token_form = token->ToString();
-        parser.AddToken(std::move(token));
+        parser_.AddToken(std::move(token));
 
         #if DEBUG_TRACE_EXECUTION
         if (token_line != line) {
@@ -35,13 +39,13 @@ auto Compiler::Compile(std::string_view source) -> bool {
         }
     }
 
-    parser.Parse();
+    parser_.Parse();
 
-    bytecode = parser.GetBytecode();
+    bytecode_ = parser_.GetBytecode();
     
     return true;
 }
 
 auto Compiler::GetBytecode() -> Bytecode {
-    return bytecode;
+    return bytecode_;
 }

@@ -1,22 +1,22 @@
 #ifndef _STRONK_PARSER_H
 #define _STRONK_PARSER_H
 
-#include "common.h"
-#include "code_generator.h"
-#include "token.h"
-#include "number_generator.h"
+#include "common/common.h"
+#include "frontend/code_generator.h"
+#include "frontend/token.h"
+#include "common/number_generator.h"
 
 class Parser {
 private:
-    CodeGenerator cg;
+    CodeGenerator cg_;
 
-    NumberGenerator num_gen;
+    NumberGenerator num_gen_;
 
-    std::vector<std::shared_ptr<Token>> tokens;
-    std::vector<std::shared_ptr<Token>>::iterator current;
-    std::vector<std::shared_ptr<Token>>::iterator previous;
-    bool error_occurred = false;
-    bool is_panic_mode = false; // Prevents cascade of errors.
+    std::vector<std::shared_ptr<Token>> tokens_;
+    std::vector<std::shared_ptr<Token>>::iterator current_;
+    std::vector<std::shared_ptr<Token>>::iterator previous_;
+    bool error_occurred_ = false;
+    bool is_panic_mode_ = false; // Prevents cascade of errors.
 
     void StepForward();
     void StepIfMatch(TokenType type, std::string_view message);
@@ -30,7 +30,7 @@ private:
     template <typename... Args> void EmitInstruction(Address &dest, OpCode op, Args... args);
     auto EmitConstInstruction(const Value &val) -> Address;
 public:
-    Parser() {}
+    Parser() = default;
     void AddToken(std::shared_ptr<Token> token);
     void Parse();
     auto GetBytecode() -> Bytecode;

@@ -3,3 +3,5 @@ a.out
 bin/
 grammar/
 tmp/
+build/
+*.dSYM/

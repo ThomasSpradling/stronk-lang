@@ -20,6 +20,7 @@ struct Instr {
     int pos_;
 
     explicit Instr(OpCode code, int line, int pos) : code_(code), line_(line), pos_(pos) {}
+    virtual ~Instr() = default;
 
     virtual auto ToString() const -> std::string {
         switch (code_) {
@@ -82,7 +83,7 @@ struct CallInstr : public Instr {
     int func_;
     std::vector<Address> args_;
 
-    CallInstr(Address &dest, std::vector<Address> &args, int func, int line, int pos) : Instr(OpCode::CALL, line, pos), args_(args), func_(func), dest_(dest) {}
+    CallInstr(Address &dest, std::vector<Address> &args, int func, int line, int pos) : Instr(OpCode::CALL, line, pos), dest_(dest), func_(func), args_(args) {}
 
     auto ToString() const -> std::string override {
         std::string res;

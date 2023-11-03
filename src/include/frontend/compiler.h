@@ -2,7 +2,7 @@
 #define _STRONK_COMPILER_H
 
 #include <string>
-#include "common.h"
+#include "common/common.h"
 #include "scanner.h"
 #include "parser.h"
 
@@ -10,9 +10,9 @@
 // bytecode.
 class Compiler {
 private:
-    Scanner scanner;
-    Parser parser;
-    Bytecode bytecode;
+    Scanner scanner_;
+    Parser parser_;
+    Bytecode bytecode_;
 public:
     Compiler() = default;
     auto Compile(std::string_view source) -> bool;

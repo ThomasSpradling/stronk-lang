@@ -43,6 +43,7 @@ struct Token {
     int line_;
 
     Token(TokenType type, int pos, int line) : type_(type), position_(pos), line_(line) {}
+    virtual ~Token() = default;
 
     virtual auto ToString() const -> std::string {
         switch (type_) {
@@ -109,7 +110,7 @@ template <class T>
 struct ValueToken : public Token {
     T value_;
 
-    ValueToken(TokenType type, int pos, int line, T value) : Token(type, pos, line), value_(value) {}
+    ValueToken(TokenType type, int pos, int line, T value) : Token(type, pos, line), value_(std::move(value)) {}
 
     auto ToString() const -> std::string override {
         std::string res = Token::ToString() + "\t\t'";

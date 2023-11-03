@@ -1,4 +1,4 @@
-#include "number_generator.h"
+#include "common/number_generator.h"
 
 auto NumberGenerator::GenerateNumber() -> int {
     return ++val_;
