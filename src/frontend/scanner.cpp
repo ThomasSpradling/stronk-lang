@@ -237,17 +237,15 @@ auto Scanner::ScanNumber() -> std::shared_ptr<Token> {
     if (*current_ != '.') {
         return MakeToken<int>(TokenType::INT, value);
     }
-
     if (isdigit(*(current_ + 1)) != 0) {
         current_++;
-
         float float_value = value;
         float d = 10;
 
         while (isdigit(*current_) != 0) {
-            current_++;
             float_value += (*current_ - '0') / d;
             d *= 10;
+            current_++;
         }
 
         return MakeToken<float>(TokenType::REAL, float_value);

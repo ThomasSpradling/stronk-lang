@@ -40,11 +40,11 @@ TEST(BasicOperationsTests, SimpleOperations) {
         BuildConstInstr(1, 0),
         BuildConstInstr(2, 1),
         BuildInstr(3, OpCode::MULT, 1, 2),
-        BuildConstInstr(4, 3),
+        BuildConstInstr(4, 2),
         BuildInstr(5, OpCode::DIV, 3, 4),
-        BuildConstInstr(6, 4),
+        BuildConstInstr(6, 3),
         BuildInstr(7, OpCode::SUB, 5, 6),
-        BuildConstInstr(8, 5),
+        BuildConstInstr(8, 4),
         BuildInstr(9, OpCode::ADD, 7, 8)
     };
     ASSERT_EQ(bytecode_result, bytecode_expected);
