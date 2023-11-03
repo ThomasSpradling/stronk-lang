@@ -1,4 +1,6 @@
+#include <stdexcept>
 #include "compiler/constant_pool.h"
+
 
 // Gets a constant from constant pool by id.
 auto ConstantPool::GetConstant(int id) -> ConstantValue {
