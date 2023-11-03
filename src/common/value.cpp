@@ -12,7 +12,7 @@ void PrintValue(Value* val) {
         std::cout << "IntValue: " << int_val->val_ << std::endl;
     } else if (auto char_val = dynamic_cast<CharValue*>(val)) {
         std::cout << "CharValue: " << char_val->val_ << std::endl;
-    } else if (auto nul_val = dynamic_cast<NilValue*>(val)) {
+    } else if (dynamic_cast<NilValue*>(val) != nullptr) {
         std::cout << "NilValue" << std::endl;
     } else {
         std::cout << "Unknown Value Type" << std::endl;
