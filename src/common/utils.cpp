@@ -46,3 +46,45 @@ auto ReadBytecodeFromTokens(const std::vector<std::shared_ptr<Token>> &tokens) -
     parser.Parse();
     return parser.GetBytecode();
 }
+
+auto BuildToken(TokenType token_type) -> std::shared_ptr<Token> {
+    return std::make_shared<Token>(token_type, 0, 0);
+}
+
+template <class T>
+auto BuildValueToken(TokenType token_type, const T &value) -> std::shared_ptr<ValueToken<T>> {
+    return std::make_shared<ValueToken<T>>(token_type, 0, 0, value);
+}
+
+auto BuildTypeToken(TokenType token_type, PrimitiveType type) -> std::shared_ptr<TypeToken> {
+    return std::make_shared<TypeToken>(token_type, 0, 0, type, 0);
+}
+
+auto BuildInstr(OpCode op) -> std::shared_ptr<Instr> {
+    return std::make_shared<Instr>(op, 0, 0);
+}
+
+template <typename... Args>
+auto BuildInstr(OpCode op, int dest, Args... args) -> std::shared_ptr<PureInstr> {
+    std::vector<int> args_vec = {args...};
+    std::vector<Address> res_vec;
+    for (auto &arg : args_vec) {
+        res_vec.push_back("__stronk_temp" + std::to_string(arg));
+    }
+    return std::make_shared<PureInstr>(op, "__stronk_temp" + std::to_string(dest), args_vec, 0, 0);
+}
+
+template <typename... Args>
+auto BuildInstr(OpCode op, const Address &dest, Args... args) -> std::shared_ptr<PureInstr> {
+    std::vector<Address> args_vec = {args...};
+    return std::make_shared<PureInstr>(op, dest, args_vec, 0, 0);
+}
+
+auto BuildConstInstr(int dest, int index) -> std::shared_ptr<ConstInstr> {
+    Address address = "__stronk_temp" + std::to_string(dest);
+    return std::make_shared<ConstInstr>(address, index, 0, 0);
+}
+
+auto BuildConstInstr(Address &dest, int index) -> std::shared_ptr<ConstInstr> { 
+    return std::make_shared<ConstInstr>(dest, index, 0, 0);
+}

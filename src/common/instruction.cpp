@@ -1,9 +1,7 @@
 #include "common/instruction.h"
 
 bool operator==(const std::shared_ptr<Instr> &instr1, const std::shared_ptr<Instr> &instr2) {
-    if (instr1->code_ == instr2->code_ &&
-        instr1->line_ == instr2->line_ &&
-        instr1->pos_ == instr2->pos_) {
+    if (instr1->code_ == instr2->code_) {
 
         switch (instr1->code_) {
             case OpCode::LABEL: {
