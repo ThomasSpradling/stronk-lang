@@ -2,6 +2,7 @@
 #define _STRONK_TOKEN_H
 
 #include <string>
+#include <memory>
 
 enum class TokenType {
     // Single character tokens

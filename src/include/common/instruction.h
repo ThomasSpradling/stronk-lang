@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 
 using Address = std::string;
 using Label = std::string;
