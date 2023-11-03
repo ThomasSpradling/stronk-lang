@@ -25,5 +25,7 @@ jobs:
         make 
 
     - name: Run tests
-      run: make check-tests
+      run: |
+        cd build
+        make check-tests
     
