@@ -139,4 +139,8 @@ struct TypeToken : public ValueToken<PrimitiveType> {
     TypeToken(TokenType type, int pos, int line, PrimitiveType value, int width) : ValueToken<PrimitiveType>(type, pos, line, value), width_(width) {}
 };
 
+auto operator==(const Token &lhs, const Token &rhs) -> bool;
+template<class T> auto operator==(const ValueToken<T> &lhs, const ValueToken<T> &rhs) -> bool;
+auto operator==(const TypeToken &lhs, const TypeToken &rhs) -> bool;
+
 #endif // _STRONK_TOKEN_H

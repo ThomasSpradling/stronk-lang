@@ -1,0 +1,9 @@
+/* This comment is /* 
+
+// Single line comment inside. This shouldn't affect anything, even if we add: /*
+
+very /* nested
+
+*/ */!!! 
+
+*/

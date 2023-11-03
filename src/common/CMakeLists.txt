@@ -2,6 +2,7 @@ add_library(
     stronk_common
     OBJECT
     number_generator.cpp
+    utils.cpp
     value.cpp
 )
 

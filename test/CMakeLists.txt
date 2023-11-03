@@ -41,21 +41,3 @@ foreach(stronk_test_source ${STRONK_TEST_SOURCES})
         )
 
 endforeach()
-
-
-
-include(GoogleTest)
-
-include_directories(${CMAKE_SOURCE_DIR}/include/backend)
-include_directories(${CMAKE_SOURCE_DIR}/include/frontend)
-include_directories(${CMAKE_SOURCE_DIR}/include/common)
-
-add_executable(TestExecutable 
-    frontend/parser_tests.cpp 
-    frontend/scanner_tests.cpp 
-    main.cpp
-)
-target_link_libraries(TestExecutable PRIVATE stronk_backend stronk_common stronk_frontend gtest gmock_main)
-
-enable_testing()
-add_test(NAME TestExecutable COMMAND TestExecutable)
