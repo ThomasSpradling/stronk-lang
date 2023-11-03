@@ -62,6 +62,8 @@ CheckOptions:
   - { key: readability-identifier-naming.VariableCase,        value: lower_case }
 WarningsAsErrors: '*'
 HeaderFilterRegex: '/(src|test)/include'
+- filter: '.*build/.*'
+- filter: '.*third_party/.*'
 AnalyzeTemporaryDtors: true
 
 #### Disabled checks and why: #####

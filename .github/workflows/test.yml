@@ -1,0 +1,29 @@
+name: Test
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+env:
+  BUILD_TYPE: Debug
+  
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v2
+
+    - name: Build tests
+      run: |
+        mkdir build
+        cd build
+        cmake ..
+        make TestExecutable
+
+    - name: Run tests
+      run: ./build/bin/TestExecutable
+    
