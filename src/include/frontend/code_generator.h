@@ -1,5 +1,6 @@
 #ifndef _STRONK_CODE_GENERATOR_H
 #define _STRONK_CODE_GENERATOR_H
+
 #include <memory>
 #include "common/instruction.h"
 #include "common/value.h"

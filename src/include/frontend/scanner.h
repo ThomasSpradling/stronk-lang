@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <unordered_map>
+#include <memory>
 #include "common/common.h"
 #include "token.h"
 
