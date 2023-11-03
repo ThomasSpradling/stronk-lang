@@ -2,6 +2,7 @@
 #define _STRONK_INSTRUCTION_H
 
 #include <string>
+#include <vector>
 
 using Address = std::string;
 using Label = std::string;
