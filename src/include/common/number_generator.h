@@ -5,7 +5,7 @@
 
 class NumberGenerator {
 private:
-    int val_;
+    int val_ = 0;
 public:
     auto GenerateNumber() -> int;
     auto GenerateTemp() -> std::string;

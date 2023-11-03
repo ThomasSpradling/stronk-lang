@@ -1,5 +1,4 @@
 #include <gtest/gtest.h>
-#include <memory>
 #include "frontend/token.h"
 #include "common/utils.h"
 #include "frontend/compiler.h"

@@ -13,7 +13,7 @@ template <class T> auto BuildValueToken(TokenType token_type, const T &value) ->
 auto BuildTypeToken(TokenType token_type, PrimitiveType type) -> std::shared_ptr<TypeToken>;
 
 auto BuildInstr(OpCode op) -> std::shared_ptr<Instr>;
-template <typename... Args> auto BuildInstr(OpCode op, int dest, Args... args) -> std::shared_ptr<PureInstr>;
-template <typename... Args> auto BuildInstr(OpCode op, const Address &dest, Args... args) -> std::shared_ptr<PureInstr>;
+template <typename... Args> auto BuildInstr(int dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr>;
+template <typename... Args> auto BuildInstr(const Address &dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr>;
 auto BuildConstInstr(int dest, int index) -> std::shared_ptr<ConstInstr>;
 auto BuildConstInstr(Address &dest, int index) -> std::shared_ptr<ConstInstr>;

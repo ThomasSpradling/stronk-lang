@@ -26,7 +26,7 @@ auto ReadTokensFromSource(const std::string &source) -> std::vector<std::shared_
     std::vector<std::shared_ptr<Token>> tokens;
     for (;;) {
         std::shared_ptr<Token> token = scanner.ScanNextToken();
-        tokens.push_back(scanner.ScanNextToken());
+        tokens.push_back(token);
 
         if (token->type_ == TokenType::TOKEN_EOF) {
             break;
@@ -65,17 +65,18 @@ auto BuildInstr(OpCode op) -> std::shared_ptr<Instr> {
 }
 
 template <typename... Args>
-auto BuildInstr(OpCode op, int dest, Args... args) -> std::shared_ptr<PureInstr> {
+auto BuildInstr(int dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr> {
     std::vector<int> args_vec = {args...};
     std::vector<Address> res_vec;
     for (auto &arg : args_vec) {
         res_vec.push_back("__stronk_temp" + std::to_string(arg));
     }
-    return std::make_shared<PureInstr>(op, "__stronk_temp" + std::to_string(dest), args_vec, 0, 0);
+    Address add = "__stronk_temp" + std::to_string(dest);
+    return std::make_shared<PureInstr>(op, add, res_vec, 0, 0);
 }
 
 template <typename... Args>
-auto BuildInstr(OpCode op, const Address &dest, Args... args) -> std::shared_ptr<PureInstr> {
+auto BuildInstr(const Address &dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr> {
     std::vector<Address> args_vec = {args...};
     return std::make_shared<PureInstr>(op, dest, args_vec, 0, 0);
 }
@@ -88,3 +89,8 @@ auto BuildConstInstr(int dest, int index) -> std::shared_ptr<ConstInstr> {
 auto BuildConstInstr(Address &dest, int index) -> std::shared_ptr<ConstInstr> { 
     return std::make_shared<ConstInstr>(dest, index, 0, 0);
 }
+
+template auto BuildInstr(int, OpCode, int) -> std::shared_ptr<PureInstr>;
+template auto BuildInstr(int, OpCode, int, int) -> std::shared_ptr<PureInstr>;
+template auto BuildValueToken<float>(TokenType, const float &) -> std::shared_ptr<ValueToken<float>>;
+template auto BuildValueToken<int>(TokenType, const int&) -> std::shared_ptr<ValueToken<int>>;
