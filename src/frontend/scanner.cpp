@@ -195,14 +195,15 @@ auto Scanner::ScanString() -> std::shared_ptr<Token> {
                 mode_.state_ = ScannerState::NORMAL;
                 mode_.str_depth_--;
                 return MakeToken(TokenType::QUOTE);
+            case '\n':
+                line_++;
+                break;
             case '$':
                 if (MatchChar('{')) {
                     mode_.state_ = ScannerState::NORMAL;
                     return MakeToken(TokenType::DOLLAR_BRACE);
                 }
-            case '\n':
-                line_++;
-                break;
+                [[fallthrough]];
             default:
                 oss << *(current_ - 1);
                 // If the next characters us to cut string.
