@@ -53,7 +53,8 @@ static void Repl() {
 // compiler and interpret it.
 static void RunFile(std::string_view path) {
     // Turn file into a string.
-    std::ifstream istream(path);
+    std::string filepath(path);
+    std::ifstream istream(filepath);
 
     if (!istream.is_open()) {
         std::cerr << "File does not exist" << "\n";

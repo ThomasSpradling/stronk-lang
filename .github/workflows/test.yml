@@ -17,7 +17,7 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v2
 
-    - name: Build tests
+    - name: Build
       run: |
         mkdir build
         cd build
@@ -25,5 +25,5 @@ jobs:
         make 
 
     - name: Run tests
-      run: ./build/bin/TestExecutable
+      run: make check-tests
     
