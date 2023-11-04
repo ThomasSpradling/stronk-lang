@@ -10,6 +10,10 @@ using Label = std::string;
 
 enum class OpCode {
     NEGATE, ADD, SUB, MULT, DIV,
+    GEQ, LEQ, GT, LT, EQ, NEQ,
+    OR, AND, NOT,
+
+    TO_STRING, CONCAT,
     LABEL,
     CALL,
     PHI,

@@ -94,3 +94,4 @@ template auto BuildInstr(int, OpCode, int) -> std::shared_ptr<PureInstr>;
 template auto BuildInstr(int, OpCode, int, int) -> std::shared_ptr<PureInstr>;
 template auto BuildValueToken<float>(TokenType, const float &) -> std::shared_ptr<ValueToken<float>>;
 template auto BuildValueToken<int>(TokenType, const int&) -> std::shared_ptr<ValueToken<int>>;
+template auto BuildValueToken<std::string>(TokenType, const std::string&) -> std::shared_ptr<ValueToken<std::string>>;
