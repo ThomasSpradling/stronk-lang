@@ -188,9 +188,21 @@ auto Scanner::ScanString() -> std::shared_ptr<Token> {
 
         switch (c) {
             case '\\':
-                // Escaped characters are their own tokens.
-                current_++;
-                return MakeToken<char>(TokenType::ESCAPED, *current_);
+                switch (*current_) {
+                    case '\'': oss << '\''; break;
+                    case '\"': oss << '\"'; break;
+                    case '\\': oss << "\\"; break;
+                    case 'n': oss << "\n"; break;
+                    case 'r': oss << "\r"; break;
+                    case 't': oss << "\t"; break;
+                    case 'b': oss << "\b"; break;
+                    case 'f': oss << "\f"; break;
+                    case '0': oss << "\0"; break;
+                    default:
+                        oss << *current_;
+                }
+
+                continue;
             case '"':
                 mode_.state_ = ScannerState::NORMAL;
                 mode_.str_depth_--;

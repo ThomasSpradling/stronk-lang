@@ -18,7 +18,7 @@ enum class TokenType {
     EQUAL, EQUAL_EQUAL,
     GREATER, GREATER_EQUAL,
     LESS, LESS_EQUAL,
-    DOLLAR_BRACE, ESCAPED,
+    DOLLAR_BRACE,
 
     // Literals
     IDENTIFIER, TEXT, INT, REAL,
@@ -71,7 +71,6 @@ struct Token {
             case TokenType::LESS: return "LESS";
             case TokenType::LESS_EQUAL: return "LESS_EQUAL";
             case TokenType::DOLLAR_BRACE: return "DOLLAR_BRACE";
-            case TokenType::ESCAPED: return "ESCAPED";
             case TokenType::IDENTIFIER: return "IDENTIFIER";
             case TokenType::TEXT: return "TEXT";
             case TokenType::INT: return "INT";
