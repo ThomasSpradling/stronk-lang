@@ -229,7 +229,7 @@ auto Parser::ParseString() -> Address {
         ValueToken<std::string> *value;
 
         switch (tok.type_) {
-            case TokenType::TEXT: // ti = const val, ti+1 = concat dest ti
+            case TokenType::TEXT:
                 StepForward();
                 value = dynamic_cast<ValueToken<std::string> *>(previous_->get());
                 if (value == nullptr) {
@@ -266,6 +266,7 @@ auto Parser::ParseString() -> Address {
                 break;
             case TokenType::QUOTE:
                 StepForward();
+                [[fallthrough]];
             default: return dest;
         }
     }
