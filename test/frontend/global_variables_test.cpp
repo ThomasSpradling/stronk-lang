@@ -7,7 +7,7 @@
 
 #define P(num) TEMP_VAR_PREFIX + std::to_string(num)
 
-TEST(GlobalVariableTests, DISABLED_BasicVariables) {
+TEST(GlobalVariableTests, BasicVariables) {
     auto token_result = ReadTokensFromSource("variable_assignment/variable_assignment.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildTypeToken(PrimitiveType::INT),
@@ -39,7 +39,7 @@ TEST(GlobalVariableTests, DISABLED_BasicVariables) {
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
 
-TEST(GlobalVariableTests, DISABLED_OverwritingVariables) {
+TEST(GlobalVariableTests, OverwritingVariables) {
     auto token_result = ReadTokensFromSource("boolean_operations/boolean_operations.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildTypeToken(PrimitiveType::BOOL),

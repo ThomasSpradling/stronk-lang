@@ -21,6 +21,7 @@ TEST(ComplexExpressionsTests, Precedence) {
         BuildValueToken<int>(TokenType::INT, 2),
         BuildToken(TokenType::LESS),
         BuildValueToken<int>(TokenType::INT, 6),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 
@@ -59,6 +60,7 @@ TEST(ComplexExpressionsTests, Grouping) {
         BuildToken(TokenType::RIGHT_PAREN),
         BuildToken(TokenType::SLASH),
         BuildValueToken<int>(TokenType::INT, 2),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 

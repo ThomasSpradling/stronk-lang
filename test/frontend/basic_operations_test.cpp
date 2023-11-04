@@ -7,6 +7,7 @@ TEST(BasicOperationsTests, SimpleInstruction) {
     auto token_result = ReadTokensFromSource("basic_operations/one_instruction.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildValueToken<int>(TokenType::INT, 12),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 
@@ -30,6 +31,7 @@ TEST(BasicOperationsTests, SimpleOperations) {
         BuildValueToken<int>(TokenType::INT, 2),
         BuildToken(TokenType::PLUS),
         BuildValueToken<int>(TokenType::INT, 3),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 
@@ -61,6 +63,7 @@ TEST(BasicOperationsTests, Associativity) {
         BuildValueToken<int>(TokenType::INT, 3),
         BuildToken(TokenType::MINUS),
         BuildValueToken<int>(TokenType::INT, 20),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF),
     };
 
@@ -85,6 +88,7 @@ TEST(BasicOperationsTests, Associativity) {
         BuildValueToken<int>(TokenType::INT, 5),
         BuildToken(TokenType::MINUS), BuildToken(TokenType::MINUS), BuildToken(TokenType::MINUS),
         BuildValueToken<int>(TokenType::INT, 6),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 
@@ -116,6 +120,7 @@ TEST(BasicOperationsTests, Precedence) {
         BuildToken(TokenType::PLUS),
         BuildToken(TokenType::MINUS),
         BuildValueToken<int>(TokenType::INT, 4),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF),
     };
 

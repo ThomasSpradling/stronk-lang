@@ -9,6 +9,7 @@ TEST(StringTests, BasicString) {
         BuildToken(TokenType::QUOTE),
         BuildValueToken<std::string>(TokenType::TEXT, "Hello, world!"),
         BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 
@@ -27,6 +28,7 @@ TEST(StringTests, BasicString) {
         BuildToken(TokenType::QUOTE),
         BuildValueToken<std::string>(TokenType::TEXT, "5 + 3"),
         BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 
@@ -52,6 +54,7 @@ TEST(StringTests, FormattedString) {
         BuildToken(TokenType::RIGHT_BRACE),
         BuildValueToken<std::string>(TokenType::TEXT, "!"),
         BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 
@@ -88,6 +91,7 @@ TEST(StringTests, NestedString) {
         BuildToken(TokenType::QUOTE),
         BuildToken(TokenType::RIGHT_BRACE),
         BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF),
     };
 
@@ -125,6 +129,7 @@ TEST(StringTests, StringInterning) {
         BuildToken(TokenType::RIGHT_BRACE),
         BuildValueToken<std::string>(TokenType::TEXT, " way "),
         BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF),
     };
 
@@ -154,6 +159,7 @@ TEST(StringTests, EscapedCharacters) {
         BuildToken(TokenType::QUOTE),
         BuildValueToken<std::string>(TokenType::TEXT, "\"Hello\\, world\"\n"),
         BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 
@@ -180,6 +186,7 @@ TEST(StringTests, Combination) {
         BuildToken(TokenType::BANG_EQUAL),
         BuildToken(TokenType::QUOTE),
         BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::SEMICOLON),
         BuildToken(TokenType::TOKEN_EOF)
     };
 
