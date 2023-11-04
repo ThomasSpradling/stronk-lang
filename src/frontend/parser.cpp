@@ -1,6 +1,16 @@
 #include <iostream>
 #include "frontend/parser.h"
 
+#define PARSE_CASE(func, opcode) \
+    StepForward(); \
+    a = dest; \
+    b = func(); \
+    \
+    dest = num_gen_.GenerateTemp(); \
+    \
+    EmitInstruction(dest, opcode, a, b); \
+    break;
+
 // Adds a sinle token to the token list.
 void Parser::AddToken(std::shared_ptr<Token> token) {
     tokens_.push_back(std::move(token));
@@ -10,9 +20,144 @@ void Parser::AddToken(std::shared_ptr<Token> token) {
 void Parser::Parse() {
     current_ = tokens_.begin();
     previous_ = tokens_.end();
-    ParseTerm();
+    if (current_->get()->type_ == TokenType::TOKEN_EOF) {
+        return;
+    }
+    ParseExpression();
     if (current_->get()->type_ != TokenType::TOKEN_EOF) {
         ErrorAt(*current_, "Expected end of file.");
+    }
+}
+
+auto Parser::ParseExpression() -> Address {
+    return ParseLogicOr();
+}
+
+// Grammar: logic_or -> logic_and ( "or" logic_and )*
+auto Parser::ParseLogicOr() -> Address {
+    Address dest = ParseLogicAnd();
+    for(;;) {
+        Token &tok = **current_;
+        Address a;
+        Address b;
+
+        switch (tok.type_) {
+            case TokenType::OR: 
+                StepForward();
+                a = dest;
+                b = ParseLogicAnd();
+
+                dest = num_gen_.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::OR, a, b);
+                break;
+            default: return dest;
+        }
+    }
+}
+
+// Grammar: logic_and -> equality ( "and" equality )*
+auto Parser::ParseLogicAnd() -> Address {
+    Address dest = ParseEquality();
+    for(;;) {
+        Token &tok = **current_;
+        Address a;
+        Address b;
+
+        switch (tok.type_) {
+            case TokenType::AND:
+                StepForward();
+                a = dest;
+                b = ParseEquality();
+
+                dest = num_gen_.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::AND, a, b);
+                break;
+            default: return dest;
+        }
+    }
+}
+
+// Grammar: equality -> comparison ( ( "!=" | "==" ) comparison )*
+auto Parser::ParseEquality() -> Address {
+    Address dest = ParseComparison();
+    for(;;) {
+        Token &tok = **current_;
+        Address a;
+        Address b;
+
+        switch (tok.type_) {
+            case TokenType::EQUAL_EQUAL:
+                StepForward();
+                a = dest;
+                b = ParseComparison();
+
+                dest = num_gen_.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::EQ, a, b);
+                break;
+            case TokenType::BANG_EQUAL:
+                StepForward();
+                a = dest;
+                b = ParseComparison();
+
+                dest = num_gen_.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::NEQ, a, b);
+                break;
+            default: return dest;
+        }
+    }
+}
+
+// Grammar: comparison -> term ( (">" | ">=" | "<" | "<=" ) term )*
+auto Parser::ParseComparison() -> Address {
+    Address dest = ParseTerm();
+    for(;;) {
+        Token &tok = **current_;
+        Address a;
+        Address b;
+
+        switch (tok.type_) {
+            case TokenType::GREATER:
+                StepForward();
+                a = dest;
+                b = ParseTerm();
+
+                dest = num_gen_.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::GT, a, b);
+                break;
+            case TokenType::GREATER_EQUAL:
+                StepForward();
+                a = dest;
+                b = ParseTerm();
+
+                dest = num_gen_.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::GEQ, a, b);
+                break;
+            case TokenType::LESS:
+                StepForward();
+                a = dest;
+                b = ParseTerm();
+
+                dest = num_gen_.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::LT, a, b);
+                break;
+            case TokenType::LESS_EQUAL:
+                StepForward();
+                a = dest;
+                b = ParseTerm();
+
+                dest = num_gen_.GenerateTemp();
+
+                EmitInstruction(dest, OpCode::LEQ, a, b);
+                break;
+            default: return dest;
+        }
     }
 }
 
@@ -25,7 +170,6 @@ auto Parser::ParseTerm() -> Address {
         Address b;
 
         switch (tok.type_) {
-            case TokenType::TOKEN_EOF: return dest;
             case TokenType::PLUS:
                 StepForward();
                 a = dest;
@@ -44,14 +188,13 @@ auto Parser::ParseTerm() -> Address {
 
                 EmitInstruction(dest, OpCode::SUB, a, b);
                 break;
-            default:
-                ErrorAt(*previous_, "Unexpected token.");
+            default: return dest;
         }
     }
     return dest;
 }
 
-// Grammar: unary -> term ( (* | /) unary )*
+// Grammar: factor -> unary ( (* | /) unary )*
 auto Parser::ParseFactor() -> Address {
     Address dest = ParseUnary();
     for (;;) {
@@ -60,7 +203,6 @@ auto Parser::ParseFactor() -> Address {
         Address b;
 
         switch (tok.type_) {
-            case TokenType::TOKEN_EOF: return dest;
             case TokenType::SLASH:
                 StepForward();
                 a = dest;
@@ -100,7 +242,9 @@ auto Parser::ParseUnary() -> Address {
     return ParsePrimary();
 }
 
-// Grammar: primary -> TRUE | FALSE | NIL | INT | REAL | IDENTIFIER
+// Grammar:
+//      primary -> TRUE | FALSE | NIL | INT | REAL | IDENTIFIER
+//              | "(" expression ")"
 auto Parser::ParsePrimary() -> Address {
     TokenType a = current_->get()->type_;
 
@@ -111,10 +255,15 @@ auto Parser::ParsePrimary() -> Address {
     ValueToken<int> *value_int;
 
     switch (a) {
-        case TokenType::TOKEN_EOF: return dest;
-        case TokenType::TRUE: return EmitConstInstruction(true);
-        case TokenType::FALSE:  return EmitConstInstruction(false);
-        case TokenType::NIL: return EmitConstInstruction(nullptr);
+        case TokenType::TRUE:
+            StepForward();
+            return EmitConstInstruction(true);
+        case TokenType::FALSE:
+            StepForward();
+            return EmitConstInstruction(false);
+        case TokenType::NIL:
+            StepForward();
+            return EmitConstInstruction(nullptr);
         case TokenType::REAL:
             StepForward();
             value_float = dynamic_cast<ValueToken<float> *>(previous_->get());
@@ -128,7 +277,7 @@ auto Parser::ParsePrimary() -> Address {
             StepForward();
             value_int = dynamic_cast<ValueToken<int> *>(previous_->get());
             if (value_int == nullptr) {
-                 ErrorAt(*previous_, "Expected float.");
+                 ErrorAt(*previous_, "Expected integer.");
             } else {
                 return EmitConstInstruction(value_int->value_);
             }
@@ -142,8 +291,16 @@ auto Parser::ParsePrimary() -> Address {
                 dest = b->value_;
             }
             break;
+        case TokenType::LEFT_PAREN:
+            StepForward();
+            dest = ParseExpression();
+            if (current_->get()->type_ != TokenType::RIGHT_PAREN) {
+                ErrorAt(*previous_, "Expected end of parentheses.");
+            }
+            StepForward();
+            break;
         default:
-            ErrorAt(*previous_, "Unexpected token.");
+            return dest;
     }
     return dest;
 }

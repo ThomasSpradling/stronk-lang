@@ -3,13 +3,13 @@
 #include "common/utils.h"
 #include "compiler/compiler.h"
 
-TEST(ComplexExpressionsTests, DISABLED_Precedence) {
+TEST(ComplexExpressionsTests, Precedence) {
     auto token_result = ReadTokensFromSource("complex_expressions/precedence.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildValueToken<int>(TokenType::INT, 3),
         BuildToken(TokenType::GREATER_EQUAL),
         BuildValueToken<int>(TokenType::INT, 10),
-        BuildToken(TokenType::EQUAL),
+        BuildToken(TokenType::EQUAL_EQUAL),
         BuildToken(TokenType::FALSE),
         BuildToken(TokenType::OR),
         BuildValueToken<int>(TokenType::INT, 5),
@@ -31,15 +31,15 @@ TEST(ComplexExpressionsTests, DISABLED_Precedence) {
         BuildConstInstr(1, 0),
         BuildConstInstr(2, 1),
         BuildInstr(3, OpCode::GEQ, 1, 2),
-        BuildConstInstr(4, 3),
+        BuildConstInstr(4, 2),
         BuildInstr(5, OpCode::EQ, 3, 4),
-        BuildConstInstr(6, 4),
-        BuildConstInstr(7, 5),
+        BuildConstInstr(6, 3),
+        BuildConstInstr(7, 4),
         BuildInstr(8, OpCode::NEQ, 6, 7),
         BuildConstInstr(9, 0),
-        BuildConstInstr(10, 6),
+        BuildConstInstr(10, 5),
         BuildInstr(11, OpCode::MULT, 9, 10),
-        BuildConstInstr(12, 7),
+        BuildConstInstr(12, 6),
         BuildInstr(13, OpCode::LT, 11, 12),
         BuildInstr(14, OpCode::AND, 8, 13),
         BuildInstr(15, OpCode::OR, 5, 14)
@@ -47,7 +47,7 @@ TEST(ComplexExpressionsTests, DISABLED_Precedence) {
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
 
-TEST(ComplexExpressionsTests, DISABLED_Grouping) {
+TEST(ComplexExpressionsTests, Grouping) {
     auto token_result = ReadTokensFromSource("complex_expressions/grouping1.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildValueToken<int>(TokenType::INT, 5),

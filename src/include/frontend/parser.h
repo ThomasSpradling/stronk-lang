@@ -23,10 +23,16 @@ private:
     void StepIfMatch(TokenType type, std::string_view message);
     void ErrorAt(std::shared_ptr<Token> &token, std::string_view message);
 
+    auto ParseExpression() -> Address;
+    auto ParseLogicOr() -> Address;
+    auto ParseLogicAnd() -> Address;
+    auto ParseEquality() -> Address;
+    auto ParseComparison() -> Address;
     auto ParseTerm() -> Address;
     auto ParseFactor() -> Address;
     auto ParseUnary() -> Address;
     auto ParsePrimary() -> Address;
+    // auto ParseString() -> Address;
 
     template <typename... Args> void EmitInstruction(Address &dest, OpCode op, Args... args);
     auto EmitConstInstruction(const ConstantPool::ConstantValue &val) -> Address;
