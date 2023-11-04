@@ -3,6 +3,8 @@
 
 // #define DEBUG_TRACE_EXECUTION
 
+#define TEMP_VAR_PREFIX "__stronk_temp"
+
 enum CONSTANTS {
     _STRONK_INT_WIDTH = 4,
     _STRONK_FLOAT_WIDTH = 8

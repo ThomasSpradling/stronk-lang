@@ -2,6 +2,7 @@
 #define _NUMBER_GENERATOR_STRONK_H
 
 #include <string>
+#include "common.h"
 
 class NumberGenerator {
 private:

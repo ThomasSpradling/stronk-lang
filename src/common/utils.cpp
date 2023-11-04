@@ -56,8 +56,8 @@ auto BuildValueToken(TokenType token_type, const T &value) -> std::shared_ptr<Va
     return std::make_shared<ValueToken<T>>(token_type, 0, 0, value);
 }
 
-auto BuildTypeToken(TokenType token_type, PrimitiveType type) -> std::shared_ptr<TypeToken> {
-    return std::make_shared<TypeToken>(token_type, 0, 0, type, 0);
+auto BuildTypeToken(PrimitiveType type) -> std::shared_ptr<TypeToken> {
+    return std::make_shared<TypeToken>(TokenType::PRIMITIVE, 0, 0, type, 0);
 }
 
 auto BuildInstr(OpCode op) -> std::shared_ptr<Instr> {
@@ -69,9 +69,9 @@ auto BuildInstr(int dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr>
     std::vector<int> args_vec = {args...};
     std::vector<Address> res_vec;
     for (auto &arg : args_vec) {
-        res_vec.push_back("__stronk_temp" + std::to_string(arg));
+        res_vec.push_back(TEMP_VAR_PREFIX + std::to_string(arg));
     }
-    Address add = "__stronk_temp" + std::to_string(dest);
+    Address add = TEMP_VAR_PREFIX + std::to_string(dest);
     return std::make_shared<PureInstr>(op, add, res_vec, 0, 0);
 }
 
@@ -82,11 +82,11 @@ auto BuildInstr(const Address &dest, OpCode op, Args... args) -> std::shared_ptr
 }
 
 auto BuildConstInstr(int dest, int index) -> std::shared_ptr<ConstInstr> {
-    Address address = "__stronk_temp" + std::to_string(dest);
+    Address address = TEMP_VAR_PREFIX + std::to_string(dest);
     return std::make_shared<ConstInstr>(address, index, 0, 0);
 }
 
-auto BuildConstInstr(Address &dest, int index) -> std::shared_ptr<ConstInstr> { 
+auto BuildConstInstr(const Address &dest, int index) -> std::shared_ptr<ConstInstr> { 
     return std::make_shared<ConstInstr>(dest, index, 0, 0);
 }
 

@@ -5,5 +5,5 @@ auto NumberGenerator::GenerateNumber() -> int {
 };
 
 auto NumberGenerator::GenerateTemp() -> std::string {
-    return "__stronk_temp" + std::to_string(++val_);
+    return TEMP_VAR_PREFIX + std::to_string(++val_);
 }

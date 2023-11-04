@@ -13,6 +13,8 @@ enum class OpCode {
     GEQ, LEQ, GT, LT, EQ, NEQ,
     OR, AND, NOT,
 
+    ID, 
+
     TO_STRING, CONCAT,
     LABEL,
     CALL,
@@ -43,6 +45,7 @@ struct Instr {
             case OpCode::OR: return "OR";
             case OpCode::AND: return "AND";
             case OpCode::NOT: return "NOT";
+            case OpCode::ID: return "ID";
             case OpCode::TO_STRING: return "TO_STRING";
             case OpCode::CONCAT: return "CONCAT";
             case OpCode::LABEL: return "LABEL";
@@ -166,7 +169,7 @@ struct ConstInstr : public Instr {
     Address dest_;
     int index_;
 
-    ConstInstr(Address &dest, int index, int line, int pos) : Instr(OpCode::CONST, line, pos), dest_(dest), index_(index) {}
+    ConstInstr(const Address &dest, int index, int line, int pos) : Instr(OpCode::CONST, line, pos), dest_(dest), index_(index) {}
 
     auto ToString() const -> std::string override {
         return dest_ + " = " + Instr::ToString() + " " + std::to_string(index_);
