@@ -42,15 +42,7 @@ auto Parser::ParseLogicOr() -> Address {
         Address b;
 
         switch (tok.type_) {
-            case TokenType::OR: 
-                StepForward();
-                a = dest;
-                b = ParseLogicAnd();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::OR, a, b);
-                break;
+            case TokenType::OR: PARSE_CASE(ParseLogicAnd, OpCode::OR)
             default: return dest;
         }
     }
@@ -65,14 +57,7 @@ auto Parser::ParseLogicAnd() -> Address {
         Address b;
 
         switch (tok.type_) {
-            case TokenType::AND:
-                StepForward();
-                a = dest;
-                b = ParseEquality();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::AND, a, b);
+            case TokenType::AND: PARSE_CASE(ParseEquality, OpCode::AND)
                 break;
             default: return dest;
         }
@@ -88,24 +73,8 @@ auto Parser::ParseEquality() -> Address {
         Address b;
 
         switch (tok.type_) {
-            case TokenType::EQUAL_EQUAL:
-                StepForward();
-                a = dest;
-                b = ParseComparison();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::EQ, a, b);
-                break;
-            case TokenType::BANG_EQUAL:
-                StepForward();
-                a = dest;
-                b = ParseComparison();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::NEQ, a, b);
-                break;
+            case TokenType::EQUAL_EQUAL: PARSE_CASE(ParseComparison, OpCode::EQ)
+            case TokenType::BANG_EQUAL: PARSE_CASE(ParseComparison, OpCode::NEQ)
             default: return dest;
         }
     }
@@ -120,42 +89,10 @@ auto Parser::ParseComparison() -> Address {
         Address b;
 
         switch (tok.type_) {
-            case TokenType::GREATER:
-                StepForward();
-                a = dest;
-                b = ParseTerm();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::GT, a, b);
-                break;
-            case TokenType::GREATER_EQUAL:
-                StepForward();
-                a = dest;
-                b = ParseTerm();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::GEQ, a, b);
-                break;
-            case TokenType::LESS:
-                StepForward();
-                a = dest;
-                b = ParseTerm();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::LT, a, b);
-                break;
-            case TokenType::LESS_EQUAL:
-                StepForward();
-                a = dest;
-                b = ParseTerm();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::LEQ, a, b);
-                break;
+            case TokenType::GREATER: PARSE_CASE(ParseTerm, OpCode::GT)
+            case TokenType::GREATER_EQUAL: PARSE_CASE(ParseTerm, OpCode::GEQ)
+            case TokenType::LESS: PARSE_CASE(ParseTerm, OpCode::LT)
+            case TokenType::LESS_EQUAL: PARSE_CASE(ParseTerm, OpCode::LEQ)
             default: return dest;
         }
     }
@@ -170,24 +107,8 @@ auto Parser::ParseTerm() -> Address {
         Address b;
 
         switch (tok.type_) {
-            case TokenType::PLUS:
-                StepForward();
-                a = dest;
-                b = ParseFactor();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::ADD, a, b);
-                break;
-            case TokenType::MINUS:
-                StepForward();
-                a = dest;
-                b = ParseFactor();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::SUB, a, b);
-                break;
+            case TokenType::PLUS: PARSE_CASE(ParseFactor, OpCode::ADD)
+            case TokenType::MINUS: PARSE_CASE(ParseFactor, OpCode::SUB)
             default: return dest;
         }
     }
@@ -203,24 +124,8 @@ auto Parser::ParseFactor() -> Address {
         Address b;
 
         switch (tok.type_) {
-            case TokenType::SLASH:
-                StepForward();
-                a = dest;
-                b = ParseUnary();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::DIV, a, b);
-                break;
-            case TokenType::STAR:
-                StepForward();
-                a = dest;
-                b = ParseUnary();
-
-                dest = num_gen_.GenerateTemp();
-
-                EmitInstruction(dest, OpCode::MULT, a, b);
-                break;
+            case TokenType::SLASH: PARSE_CASE(ParseUnary, OpCode::DIV)
+            case TokenType::STAR: PARSE_CASE(ParseUnary, OpCode::MULT)
             default:
                 return dest;
         }
