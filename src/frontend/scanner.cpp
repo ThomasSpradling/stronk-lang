@@ -188,7 +188,8 @@ auto Scanner::ScanString() -> std::shared_ptr<Token> {
 
         switch (c) {
             case '\\':
-                switch (*current_) {
+                c = *current_++;
+                switch (c) {
                     case '\'': oss << '\''; break;
                     case '\"': oss << '\"'; break;
                     case '\\': oss << "\\"; break;
@@ -199,34 +200,37 @@ auto Scanner::ScanString() -> std::shared_ptr<Token> {
                     case 'f': oss << "\f"; break;
                     case '0': oss << "\0"; break;
                     default:
-                        oss << *current_;
+                        oss << c;
                 }
-
-                continue;
+                break;
             case '"':
                 mode_.state_ = ScannerState::NORMAL;
                 mode_.str_depth_--;
                 return MakeToken(TokenType::QUOTE);
             case '\n':
                 line_++;
-                break;
+                continue;
             case '$':
                 if (MatchChar('{')) {
                     mode_.state_ = ScannerState::NORMAL;
                     return MakeToken(TokenType::DOLLAR_BRACE);
                 }
-                [[fallthrough]];
+                break;
             default:
-                oss << *(current_ - 1);
-                // If the next characters us to cut string.
-                if (current_ == source_.end() || *current_ == '"' || *current_  == '\\') {
-                    std::string value = oss.str();
-                    return MakeToken<std::string>(TokenType::TEXT, value);
-                }
-                if (current_ + 1 == source_.end() || (*current_ == '$' && *(current_ + 1) == '{')) {
-                    std::string value = oss.str();
-                    return MakeToken<std::string>(TokenType::TEXT, value);
-                }
+                break;
+        }
+
+        if (*(current_ - 2) != '\\') {
+            oss << *(current_ - 1);
+        }
+        // If the next characters us to cut string.
+        if (current_ == source_.end() || *current_ == '"') {
+            std::string value = oss.str();
+            return MakeToken<std::string>(TokenType::TEXT, value);
+        }
+        if (current_ + 1 == source_.end() || (*current_ == '$' && *(current_ + 1) == '{')) {
+            std::string value = oss.str();
+            return MakeToken<std::string>(TokenType::TEXT, value);
         }
     }
 }

@@ -3,7 +3,7 @@
 #include "common/utils.h"
 #include "compiler/compiler.h"
 
-TEST(StringTests, DISABLED_BasicString) {
+TEST(StringTests, BasicString) {
     auto token_result = ReadTokensFromSource("strings/single_string.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildToken(TokenType::QUOTE),
@@ -40,7 +40,7 @@ TEST(StringTests, DISABLED_BasicString) {
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
 
-TEST(StringTests, DISABLED_FormattedString) {
+TEST(StringTests, FormattedString) {
     auto token_result = ReadTokensFromSource("strings/string_interpolation.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildToken(TokenType::QUOTE),
@@ -72,7 +72,7 @@ TEST(StringTests, DISABLED_FormattedString) {
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
 
-TEST(StringTests, DISABLED_NestedString) {
+TEST(StringTests, NestedString) {
     auto token_result = ReadTokensFromSource("strings/nested_interpolation.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildToken(TokenType::QUOTE),
@@ -107,7 +107,7 @@ TEST(StringTests, DISABLED_NestedString) {
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
 
-TEST(StringTests, DISABLED_StringInterning) {
+TEST(StringTests, StringInterning) {
     auto token_result = ReadTokensFromSource("strings/string_interning.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildToken(TokenType::QUOTE),
@@ -148,7 +148,7 @@ TEST(StringTests, DISABLED_StringInterning) {
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
 
-TEST(StringTests, DISABLED_EscapedCharacters) {
+TEST(StringTests, EscapedCharacters) {
     auto token_result = ReadTokensFromSource("strings/escaped_characters.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildToken(TokenType::QUOTE),
@@ -165,4 +165,36 @@ TEST(StringTests, DISABLED_EscapedCharacters) {
     };
 
     ASSERT_EQ(bytecode_result, bytecode_expected);
+}
+
+TEST(StringTests, Combination) {
+    // Case: "${ 5 } " != ""
+    auto token_result = ReadTokensFromSource("strings/combination.stronk");
+    std::vector<std::shared_ptr<Token>> token_expected {
+        BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::DOLLAR_BRACE),
+        BuildValueToken<int>(TokenType::INT, 5),
+        BuildToken(TokenType::RIGHT_BRACE),
+        BuildValueToken<std::string>(TokenType::TEXT, " "),
+        BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::BANG_EQUAL),
+        BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::QUOTE),
+        BuildToken(TokenType::TOKEN_EOF)
+    };
+
+    ASSERT_EQ(token_result, token_expected);
+
+    auto bytecode_result = ReadBytecodeFromTokens(token_expected);
+    Bytecode bytecode_expected = {
+        BuildConstInstr(1, 0),
+        BuildInstr(2, OpCode::TO_STRING, 1),
+        BuildConstInstr(3, 1),
+        BuildInstr(4, OpCode::CONCAT, 2, 3),
+        BuildConstInstr(5, 2),
+        BuildInstr(6, OpCode::NEQ, 4, 5),
+    };
+
+    ASSERT_EQ(bytecode_result, bytecode_expected);
+
 }

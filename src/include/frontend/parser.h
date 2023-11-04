@@ -32,7 +32,7 @@ private:
     auto ParseFactor() -> Address;
     auto ParseUnary() -> Address;
     auto ParsePrimary() -> Address;
-    // auto ParseString() -> Address;
+    auto ParseString() -> Address;
 
     template <typename... Args> void EmitInstruction(Address &dest, OpCode op, Args... args);
     auto EmitConstInstruction(const ConstantPool::ConstantValue &val) -> Address;
