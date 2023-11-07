@@ -5,7 +5,7 @@
 
 #define P(num) (TEMP_VAR_PREFIX + std::to_string(num)).c_str()
 
-TEST(StatementsTests, DISABLED_PrintStatement) {
+TEST(StatementsTests, PrintStatement) {
     auto token_result = ReadTokensFromSource("statements/print_basic.stronk");
 
     auto bytecode_result = ReadBytecodeFromTokens(token_result);
@@ -19,8 +19,8 @@ TEST(StatementsTests, DISABLED_PrintStatement) {
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
 
-TEST(StatementsTests, DISABLED_BasicIfStatement) {
-    auto token_result = ReadTokensFromSource("complex_expressions/if_basic.stronk");
+TEST(StatementsTests, BasicIfStatement) {
+    auto token_result = ReadTokensFromSource("statements/if_basic.stronk");
 
     auto bytecode_result = ReadBytecodeFromTokens(token_result);
     Bytecode bytecode_expected = {
@@ -32,7 +32,8 @@ TEST(StatementsTests, DISABLED_BasicIfStatement) {
         BuildBr(P(5), ".if_0.true", ".if_0.false"),
         BuildLabel(".if_0.true"),
         BuildConstInstr(6, 3),
-        BuildInstr(OpCode::PRINT, P(2)),
+        BuildInstr("a", OpCode::ID, P(6)),
+        BuildInstr(OpCode::PRINT, "a"),
         BuildJmp(".if_0.exit"),
         BuildLabel(".if_0.false"),
         BuildConstInstr(7, 4),
@@ -42,8 +43,8 @@ TEST(StatementsTests, DISABLED_BasicIfStatement) {
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
 
-TEST(StatementsTests, DISABLED_AloneIfStatement) {
-    auto token_result = ReadTokensFromSource("complex_expressions/alone_if.stronk");
+TEST(StatementsTests, AloneIfStatement) {
+    auto token_result = ReadTokensFromSource("statements/alone_if.stronk");
 
     auto bytecode_result = ReadBytecodeFromTokens(token_result);
     Bytecode bytecode_expected = {
@@ -57,8 +58,8 @@ TEST(StatementsTests, DISABLED_AloneIfStatement) {
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
 
-TEST(StatementsTests, DISABLED_BasicWhileStatement) {
-    auto token_result = ReadTokensFromSource("complex_expressions/while_basic.stronk");
+TEST(StatementsTests, BasicWhileStatement) {
+    auto token_result = ReadTokensFromSource("statements/while_basic.stronk");
 
     auto bytecode_result = ReadBytecodeFromTokens(token_result);
     Bytecode bytecode_expected = {
@@ -72,7 +73,7 @@ TEST(StatementsTests, DISABLED_BasicWhileStatement) {
         BuildConstInstr(4, 2),
         BuildInstr(P(5), OpCode::ADD, "i", P(4)),
         BuildInstr("i", OpCode::ID, P(5)),
-        BuildJmp(".while_0.true"),
+        BuildJmp(".while_0.cond"),
         BuildLabel(".while_0.exit"),
     };
     ASSERT_EQ(bytecode_result, bytecode_expected);

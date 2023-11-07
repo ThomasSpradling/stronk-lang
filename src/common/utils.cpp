@@ -91,7 +91,7 @@ auto BuildJmp(Label label) -> std::shared_ptr<ImpureInstr> {
 auto BuildBr(Address arg, Label label1, Label label2) -> std::shared_ptr<ImpureInstr> {
     std::vector<Address> args {arg};
     std::vector<Label> labels { label1, label2 };
-    return std::make_shared<ImpureInstr>(OpCode::JMP, args, labels, 0, 0);
+    return std::make_shared<ImpureInstr>(OpCode::BR, args, labels, 0, 0);
 }
 
 template <typename... Args>

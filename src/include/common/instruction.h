@@ -34,9 +34,14 @@ struct Instr {
     explicit Instr(OpCode code, int line, int pos) : code_(code), line_(line), pos_(pos) {}
     virtual ~Instr() = default;
 
+    virtual bool operator==(const std::shared_ptr<Instr>& other) const {
+        return (code_ == other->code_);
+    }
+
     virtual auto ToString() const -> std::string {
         switch (code_) {
             case OpCode::ADD: return "ADD";
+            case OpCode::NEGATE: return "NEGATE";
             case OpCode::SUB: return "SUB";
             case OpCode::MULT: return "MULT";
             case OpCode::DIV: return "DIV";
@@ -70,6 +75,14 @@ struct LabelInstr : public Instr {
 
     explicit LabelInstr(Label &label, int line, int pos) : Instr(OpCode::LABEL, line, pos), label_(label) {}
 
+    bool operator==(const std::shared_ptr<Instr>& other) const override {
+        if (auto other_label = std::dynamic_pointer_cast<LabelInstr>(other)) {
+            return (code_ == other->code_) &&
+                   (label_ == other_label->label_);
+        }
+        return false;
+    }
+
     auto ToString() const -> std::string override {
         std::string res = Instr::ToString();
         res += " " + label_;
@@ -83,6 +96,14 @@ struct ImpureInstr : public Instr {
     std::vector<Address> args_;
 
     ImpureInstr(OpCode code, std::vector<Address> &args, std::vector<Label> &labels, int line, int pos) : Instr(code, line, pos), labels_(labels), args_(args) {}
+
+    bool operator==(const std::shared_ptr<Instr>& other) const override {
+        if (auto other_impure = std::dynamic_pointer_cast<ImpureInstr>(other)) {
+            return (code_ == other->code_) &&
+                   (labels_ == other_impure->labels_) && (args_ == other_impure->args_);
+        }
+        return false;
+    }
 
     auto ToString() const -> std::string override {
         std::string res = Instr::ToString() + " ";
@@ -111,6 +132,14 @@ struct CallInstr : public Instr {
 
     CallInstr(Address &dest, std::vector<Address> &args, int func, int line, int pos) : Instr(OpCode::CALL, line, pos), dest_(dest), func_(func), args_(args) {}
 
+    bool operator==(const std::shared_ptr<Instr>& other) const override {
+        if (auto other_call = std::dynamic_pointer_cast<CallInstr>(other)) {
+            return (code_ == other->code_) &&
+                   (dest_ == other_call->dest_) && (func_ == other_call->func_) && (args_ == other_call->args_);
+        }
+        return false;
+    }
+
     auto ToString() const -> std::string override {
         std::string res;
 
@@ -135,6 +164,14 @@ struct PureInstr : public Instr {
 
     PureInstr(OpCode code, Address &dest, std::vector<Address> &args, int line, int pos) : Instr(code, line, pos), dest_(dest), args_(args) {}
     
+    bool operator==(const std::shared_ptr<Instr>& other) const override {
+        if (auto other_pure = std::dynamic_pointer_cast<PureInstr>(other)) {
+            return (code_ == other->code_) &&
+                   (dest_ == other_pure->dest_) && (args_ == other_pure->args_);
+        }
+        return false;
+    }
+
     auto ToString() const -> std::string override {
         std::string res = dest_ + " = " + Instr::ToString() + " ";
         for (const auto &arg : args_) {
@@ -151,6 +188,14 @@ struct PhiInstr : public Instr {
     std::vector<Address> args_;
 
     PhiInstr(Address &dest, std::vector<Address> &args, std::vector<Label> &labels, int line, int pos) : Instr(OpCode::PHI, line, pos), dest_(dest), labels_(labels), args_(args) {}
+
+    bool operator==(const std::shared_ptr<Instr>& other) const override {
+        if (auto other_phi = std::dynamic_pointer_cast<PhiInstr>(other)) {
+            return (code_ == other->code_) &&
+                   (dest_ == other_phi->dest_) && (labels_ == other_phi->labels_) && (args_ == other_phi->args_);
+        }
+        return false;
+    }
 
     auto ToString() const -> std::string override {
         std::string res = dest_ + " = " + Instr::ToString() + " ";
@@ -177,6 +222,14 @@ struct ConstInstr : public Instr {
     int index_;
 
     ConstInstr(const Address &dest, int index, int line, int pos) : Instr(OpCode::CONST, line, pos), dest_(dest), index_(index) {}
+
+    bool operator==(const std::shared_ptr<Instr>& other) const override {
+        if (auto other_const = std::dynamic_pointer_cast<ConstInstr>(other)) {
+            return (code_ == other->code_) &&
+                   (dest_ == other_const->dest_) && (index_ == other_const->index_);
+        }
+        return false;
+    }
 
     auto ToString() const -> std::string override {
         return dest_ + " = " + Instr::ToString() + " " + std::to_string(index_);

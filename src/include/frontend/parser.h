@@ -12,6 +12,7 @@ private:
     CodeGenerator cg_;
 
     NumberGenerator num_gen_;
+    NumberGenerator control_flow_gen_;
 
     std::vector<std::shared_ptr<Token>> tokens_;
     std::vector<std::shared_ptr<Token>>::iterator current_;
@@ -30,6 +31,7 @@ private:
     void ParseForStatement();
     void ParseIfStatement();
     void ParseWhileStatement();
+    void ParsePrintStatement();
     void ParseBlock();
     auto ParseExpression() -> Address;
     auto ParseAssignment() -> Address;
@@ -46,6 +48,10 @@ private:
     template <typename... Args> void EmitInstruction(Address &dest, OpCode op, Args... args);
     auto EmitConstInstruction(const ConstantPool::ConstantValue &val) -> Address;
     auto EmitConstInstruction(Address &dest, const ConstantPool::ConstantValue &val) -> Address;
+    template <typename... Args> void EmitInstruction(OpCode op, Args... args);
+    void EmitBr(Address cond, Label label1, Label label2);
+    void EmitLabel(Label label);
+    void EmitJmp(Label label);
 public:
     Parser() = default;
     void AddToken(std::shared_ptr<Token> token);

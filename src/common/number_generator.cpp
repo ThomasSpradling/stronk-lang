@@ -1,7 +1,7 @@
 #include "common/number_generator.h"
 
 auto NumberGenerator::GenerateNumber() -> int {
-    return ++val_;
+    return val_++;
 };
 
 auto NumberGenerator::GenerateTemp() -> std::string {

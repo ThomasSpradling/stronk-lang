@@ -97,6 +97,10 @@ void Parser::ParseStatement() {
             StepForward();
             ParseBlock();
             break;
+        case TokenType::PRINT:
+            StepForward();
+            ParsePrintStatement();
+            break;
         default:
             ParseExprStatement();
             break;
@@ -104,9 +108,98 @@ void Parser::ParseStatement() {
 }
 
 void Parser::ParseForStatement() {}
-void Parser::ParseIfStatement() {}
-void Parser::ParseWhileStatement() {}
-void Parser::ParseBlock() {}
+
+// Grammar: "if" "(" expression ")" statement ( "else" statement )?
+void Parser::ParseIfStatement() {
+    if (previous_->get()->type_ != TokenType::IF) {
+        throw std::invalid_argument("Incorrect usage of ParseIfStatement.");
+    }
+
+    if (current_->get()->type_ != TokenType::LEFT_PAREN) {
+        ErrorAt(*previous_, "Expected '('.");
+    }
+
+    std::string if_num = std::to_string(control_flow_gen_.GenerateNumber());
+    Label true_branch = ".if_" + if_num + ".true";
+    Label false_branch = ".if_" + if_num + ".false";
+    Label exit_branch = ".if_" + if_num + ".exit";
+
+    Address cond = ParseExpression();
+    EmitBr(cond, true_branch, false_branch);
+
+    EmitLabel(true_branch);
+    ParseStatement();
+    
+    if (current_->get()->type_ != TokenType::ELSE) {
+        // Cut off early and use false branch as the exit label
+        EmitLabel(false_branch);
+        return;
+    }
+
+    StepForward();
+
+    EmitJmp(exit_branch);
+
+    EmitLabel(false_branch);
+    ParseStatement();
+    EmitLabel(exit_branch);
+}
+
+// Grammar: "while" "(" expression ")" statement
+void Parser::ParseWhileStatement() {
+    if (previous_->get()->type_ != TokenType::WHILE) {
+        throw std::invalid_argument("Incorrect usage of ParseWhileStatement.");
+    }
+    std::string while_num = std::to_string(control_flow_gen_.GenerateNumber());
+    Label condition_label = ".while_" + while_num + ".cond";
+    Label true_label = ".while_" + while_num + ".true";
+    Label exit_label = ".while_" + while_num + ".exit";
+
+    EmitLabel(condition_label);
+
+    Address cond = ParseExpression();
+    EmitBr(cond, true_label, exit_label);
+
+    EmitLabel(true_label);
+    ParseStatement();
+    EmitJmp(condition_label);
+
+    EmitLabel(exit_label);
+}
+
+// Grammar: print_statement -> "print" expression ";"
+void Parser::ParsePrintStatement() {
+    if (previous_->get()->type_ != TokenType::PRINT) {
+        throw std::invalid_argument("Incorrect usage of ParsePrintStatement.");
+    }
+
+    Address dest = ParseExpression();
+
+    if (current_->get()->type_ != TokenType::SEMICOLON) {
+        ErrorAt(*previous_, "Expected ';'.");
+    }
+    StepForward();
+
+    EmitInstruction(OpCode::PRINT, dest);
+}
+
+// Grammar: block_statement -> "{" declaration* "}"
+void Parser::ParseBlock() {
+    if (previous_->get()->type_ != TokenType::LEFT_BRACE) {
+        throw std::invalid_argument("Incorrect usage of ParseBlock.");
+    }
+    while (
+        current_->get()->type_ != TokenType::RIGHT_BRACE &&
+        current_->get()->type_ != TokenType::TOKEN_EOF ) {
+        ParseDeclaration();
+    }
+
+    if (current_->get()->type_ != TokenType::RIGHT_BRACE) {
+        ErrorAt(*previous_, "Expected '}'.");
+    }
+
+    StepForward();
+}
 
 // Grammar: expr_statement -> expression ";"
 void Parser::ParseExprStatement() {
@@ -368,7 +461,9 @@ auto Parser::ParseString() -> Address {
                     a = dest;
                     b = ParseExpression();
                     dest = num_gen_.GenerateTemp();
-                    EmitInstruction(dest, OpCode::TO_STRING, a);
+                    EmitInstruction(dest, OpCode::TO_STRING, b);
+
+                    b = dest;
 
                     dest = num_gen_.GenerateTemp();
                     EmitInstruction(dest, OpCode::CONCAT, a, b);
@@ -392,6 +487,37 @@ void Parser::EmitInstruction(Address &dest, OpCode op, Args... args) {
     int position = previous_->get()->position_;
     std::vector<Address> args_vec = {args...};
     cg_.AddInstruction(std::make_shared<PureInstr>(op, dest, args_vec, line, position));
+}
+
+template <typename... Args>
+void Parser::EmitInstruction(OpCode op, Args... args) {
+    int line = previous_->get()->line_;
+    int position = previous_->get()->position_;
+    std::vector<Address> arg_vec = {args...};
+    std::vector<Address> label_vec;
+    cg_.AddInstruction(std::make_shared<ImpureInstr>(op, arg_vec, label_vec, line, position));
+}
+
+void Parser::EmitBr(Address cond, Label label1, Label label2) {
+    int line = previous_->get()->line_;
+    int position = previous_->get()->position_;
+    std::vector<Address> arg_vec = { cond };
+    std::vector<Address> label_vec = { label1, label2 };
+    cg_.AddInstruction(std::make_shared<ImpureInstr>(OpCode::BR, arg_vec, label_vec, line, position));
+}
+
+void Parser::EmitLabel(Label label) {
+    int line = previous_->get()->line_;
+    int position = previous_->get()->position_;
+    cg_.AddInstruction(std::make_shared<LabelInstr>(label, line, position));
+}
+
+void Parser::EmitJmp(Label label) {
+    int line = previous_->get()->line_;
+    int position = previous_->get()->position_;
+    std::vector<Address> arg_vec;
+    std::vector<Address> label_vec = { label };
+    cg_.AddInstruction(std::make_shared<ImpureInstr>(OpCode::JMP, arg_vec, label_vec, line, position));
 }
 
 auto Parser::EmitConstInstruction(const ConstantPool::ConstantValue &val) -> Address {

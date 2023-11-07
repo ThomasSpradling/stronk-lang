@@ -101,9 +101,9 @@ TEST(BasicOperationsTests, Associativity) {
         BuildInstr(3, OpCode::NEGATE, 2),
         BuildInstr(4, OpCode::NEGATE, 3),
         BuildConstInstr(5, 1),
-        BuildInstr(5, OpCode::NEGATE, 5),
-        BuildInstr(6, OpCode::NEGATE, 6),
-        BuildInstr(7, OpCode::SUB, 4, 7),
+        BuildInstr(6, OpCode::NEGATE, 5),
+        BuildInstr(7, OpCode::NEGATE, 6),
+        BuildInstr(8, OpCode::SUB, 4, 7),
     };
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
@@ -134,8 +134,8 @@ TEST(BasicOperationsTests, Precedence) {
         BuildInstr(4, OpCode::MULT, 2, 3),
         BuildInstr(5, OpCode::SUB, 1, 4),
         BuildConstInstr(6, 3),
-        BuildInstr(6, OpCode::NEGATE, 6),
-        BuildInstr(7, OpCode::ADD, 5, 7),
+        BuildInstr(7, OpCode::NEGATE, 6),
+        BuildInstr(8, OpCode::ADD, 5, 7),
     };
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }

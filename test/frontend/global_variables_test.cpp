@@ -80,7 +80,7 @@ TEST(GlobalVariableTests, OverwritingVariables) {
         BuildInstr("a", OpCode::ID, "b"),
         BuildConstInstr(P(3), 1),
         BuildInstr("b", OpCode::ID, P(3)),
-        BuildInstr(P(1), OpCode::OR, "a", "b"),
+        BuildInstr(P(4), OpCode::OR, "a", "b"),
     };
 
     ASSERT_EQ(bytecode_result, bytecode_expected);
