@@ -20,17 +20,131 @@ void Parser::AddToken(std::shared_ptr<Token> token) {
 void Parser::Parse() {
     current_ = tokens_.begin();
     previous_ = tokens_.end();
-    if (current_->get()->type_ == TokenType::TOKEN_EOF) {
-        return;
-    }
-    ParseExpression();
-    if (current_->get()->type_ != TokenType::TOKEN_EOF) {
-        ErrorAt(*current_, "Expected end of file.");
+
+    while (current_->get()->type_ != TokenType::TOKEN_EOF) {
+        ParseDeclaration();
     }
 }
 
+// Grammar: declaration -> TYPE var_declaration | statement
+void Parser::ParseDeclaration() {
+    switch (current_->get()->type_) {
+        case TokenType::PRIMITIVE:
+            StepForward();
+            ParseVarDeclaration();
+            break;
+        default:
+            ParseStatement();
+            break;
+    }
+}
+
+// Grammar: var_declaration -> IDENTIFIER ( "=" expression )? ";"
+void Parser::ParseVarDeclaration() {
+    Token tok = **current_;
+    if (tok.type_ != TokenType::IDENTIFIER) {
+        ErrorAt(*current_, "Expected identifier.");
+        return;
+    }
+    auto value_token = dynamic_cast<ValueToken<std::string> *>(current_->get());
+    if (value_token == nullptr) {
+        ErrorAt(*current_, "Expected identifier.");
+        return;
+    }
+    Address dest = value_token->value_;
+
+    StepForward();
+
+    Address arg;
+
+    switch (current_->get()->type_) {
+        case TokenType::EQUAL:
+            StepForward();
+            arg = ParseExpression();
+
+            if (current_->get()->type_ != TokenType::SEMICOLON) {
+                ErrorAt(*previous_, "Expected ';'.");
+            }
+
+            EmitInstruction(dest, OpCode::ID, arg);
+            StepForward();
+            break;
+        case TokenType::SEMICOLON:
+            EmitConstInstruction(dest, nullptr);
+            StepForward();
+            break;
+        default:
+            ErrorAt(*current_, "Expected ';' or '='.");
+    }
+}
+
+// Grammar: statement -> expression_statement | for_statement | if_statement | while_statement | block
+void Parser::ParseStatement() {
+    switch (current_->get()->type_) {
+        case TokenType::FOR:
+            StepForward();
+            ParseForStatement();
+            break;
+        case TokenType::IF:
+            StepForward();
+            ParseIfStatement();
+            break;
+        case TokenType::WHILE:
+            StepForward();
+            ParseWhileStatement();
+            break;
+        case TokenType::LEFT_BRACE:
+            StepForward();
+            ParseBlock();
+            break;
+        default:
+            ParseExprStatement();
+            break;
+    }
+}
+
+void Parser::ParseForStatement() {}
+void Parser::ParseIfStatement() {}
+void Parser::ParseWhileStatement() {}
+void Parser::ParseBlock() {}
+
+// Grammar: expr_statement -> expression ";"
+void Parser::ParseExprStatement() {
+    ParseExpression();
+    if (current_->get()->type_ != TokenType::SEMICOLON) {
+        ErrorAt(*previous_, "Expected ';'.");
+    }
+    StepForward();
+}
+
+// Grammar: expression -> assignment
 auto Parser::ParseExpression() -> Address {
-    return ParseLogicOr();
+    return ParseAssignment();
+}
+
+// Grammar: assignment -> IDENTIFER "=" assignment | logic_or
+auto Parser::ParseAssignment() -> Address {
+    if ((current_ + 1)->get()->type_ != TokenType::EQUAL) {
+        return ParseLogicOr();
+    }
+
+    auto value_token = dynamic_cast<ValueToken<std::string> *>(current_->get());
+    if (value_token == nullptr) {
+        ErrorAt(*current_, "Expected identifier.");
+        return "";
+    }
+    Address dest = value_token->value_;
+
+    StepForward();
+
+    if (current_->get()->type_ != TokenType::EQUAL) {
+        ErrorAt(*current_, "Expected '='.");
+    }
+
+    StepForward();
+
+    EmitInstruction(dest, OpCode::ID, ParseAssignment());
+    return dest;
 }
 
 // Grammar: logic_or -> logic_and ( "or" logic_and )*
@@ -282,6 +396,13 @@ void Parser::EmitInstruction(Address &dest, OpCode op, Args... args) {
 
 auto Parser::EmitConstInstruction(const ConstantPool::ConstantValue &val) -> Address {
     Address dest = num_gen_.GenerateTemp();
+    int line = previous_->get()->line_;
+    int position = previous_->get()->position_;
+    cg_.AddConstantInstruction(dest, val, line, position);
+    return dest;
+}
+
+auto Parser::EmitConstInstruction(Address &dest, const ConstantPool::ConstantValue &val) -> Address {
     int line = previous_->get()->line_;
     int position = previous_->get()->position_;
     cg_.AddConstantInstruction(dest, val, line, position);

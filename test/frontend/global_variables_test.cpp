@@ -5,10 +5,10 @@
 #include "compiler/compiler.h"
 #include "common/common.h"
 
-#define P(num) TEMP_VAR_PREFIX + std::to_string(num)
+#define P(num) (TEMP_VAR_PREFIX + std::to_string(num)).c_str()
 
 TEST(GlobalVariableTests, BasicVariables) {
-    auto token_result = ReadTokensFromSource("variable_assignment/variable_assignment.stronk");
+    auto token_result = ReadTokensFromSource("global_variables/basic_variables.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildTypeToken(PrimitiveType::INT),
         BuildValueToken<std::string>(TokenType::IDENTIFIER, "a"),
@@ -31,8 +31,10 @@ TEST(GlobalVariableTests, BasicVariables) {
 
     auto bytecode_result = ReadBytecodeFromTokens(token_expected);
     Bytecode bytecode_expected = {
-        BuildConstInstr("a", 0),
-        BuildConstInstr("b", 1),
+        BuildConstInstr(P(1), 0),
+        BuildInstr("a", OpCode::ID, P(1)),
+        BuildConstInstr(P(2), 1),
+        BuildInstr("b", OpCode::ID, P(2)),
         BuildInstr(P(3), OpCode::ADD, "a", "b"),
     };
 
@@ -40,7 +42,7 @@ TEST(GlobalVariableTests, BasicVariables) {
 }
 
 TEST(GlobalVariableTests, OverwritingVariables) {
-    auto token_result = ReadTokensFromSource("boolean_operations/boolean_operations.stronk");
+    auto token_result = ReadTokensFromSource("global_variables/overwriting_variables.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
         BuildTypeToken(PrimitiveType::BOOL),
         BuildValueToken<std::string>(TokenType::IDENTIFIER, "a"),
@@ -71,10 +73,13 @@ TEST(GlobalVariableTests, OverwritingVariables) {
 
     auto bytecode_result = ReadBytecodeFromTokens(token_expected);
     Bytecode bytecode_expected = {
-        BuildConstInstr("a", 0),
-        BuildConstInstr("b", 1),
+        BuildConstInstr(P(1), 0),
+        BuildInstr("a", OpCode::ID, P(1)),
+        BuildConstInstr(P(2), 1),
+        BuildInstr("b", OpCode::ID, P(2)),
         BuildInstr("a", OpCode::ID, "b"),
-        BuildConstInstr("b", 1),
+        BuildConstInstr(P(3), 1),
+        BuildInstr("b", OpCode::ID, P(3)),
         BuildInstr(P(1), OpCode::OR, "a", "b"),
     };
 

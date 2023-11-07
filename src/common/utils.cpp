@@ -76,9 +76,9 @@ auto BuildInstr(int dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr>
 }
 
 template <typename... Args>
-auto BuildInstr(const Address &dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr> {
-    std::vector<Address> args_vec = {args...};
-    return std::make_shared<PureInstr>(op, dest, args_vec, 0, 0);
+auto BuildInstr(Address dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr> {
+    std::vector<Address> res_vec = {args...};
+    return std::make_shared<PureInstr>(op, dest, res_vec, 0, 0);
 }
 
 auto BuildConstInstr(int dest, int index) -> std::shared_ptr<ConstInstr> {
@@ -92,6 +92,8 @@ auto BuildConstInstr(const Address &dest, int index) -> std::shared_ptr<ConstIns
 
 template auto BuildInstr(int, OpCode, int) -> std::shared_ptr<PureInstr>;
 template auto BuildInstr(int, OpCode, int, int) -> std::shared_ptr<PureInstr>;
+template auto BuildInstr(Address, OpCode, const char *, const char *) -> std::shared_ptr<PureInstr>;
+template auto BuildInstr(Address, OpCode, const char *) -> std::shared_ptr<PureInstr>;
 template auto BuildValueToken<float>(TokenType, const float &) -> std::shared_ptr<ValueToken<float>>;
 template auto BuildValueToken<int>(TokenType, const int&) -> std::shared_ptr<ValueToken<int>>;
 template auto BuildValueToken<std::string>(TokenType, const std::string&) -> std::shared_ptr<ValueToken<std::string>>;
