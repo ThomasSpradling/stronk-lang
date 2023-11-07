@@ -18,3 +18,9 @@ template <typename... Args> auto BuildInstr(int dest, OpCode op, Args... args) -
 template <typename... Args> auto BuildInstr(Address dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr>;
 auto BuildConstInstr(const Address &dest, int index) -> std::shared_ptr<ConstInstr>;
 auto BuildConstInstr(int dest, int index) -> std::shared_ptr<ConstInstr>;
+
+template <typename... Args> auto BuildInstr(OpCode op, Args... args) -> std::shared_ptr<ImpureInstr>;
+auto BuildJmp(Label label) -> std::shared_ptr<ImpureInstr>;
+auto BuildBr(Address arg, Label label1, Label label2) -> std::shared_ptr<ImpureInstr>;
+
+auto BuildLabel(Label label) -> std::shared_ptr<LabelInstr>;

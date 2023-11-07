@@ -76,6 +76,25 @@ auto BuildInstr(int dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr>
 }
 
 template <typename... Args>
+auto BuildInstr(OpCode op, Args... args) -> std::shared_ptr<ImpureInstr> {
+    std::vector<Address> res_vec = {args...};
+    std::vector<Label> labels;
+    return std::make_shared<ImpureInstr>(op, res_vec, labels, 0, 0);
+}
+
+auto BuildJmp(Label label) -> std::shared_ptr<ImpureInstr> {
+    std::vector<Address> args;
+    std::vector<Label> labels { label };
+    return std::make_shared<ImpureInstr>(OpCode::JMP, args, labels, 0, 0);
+}
+
+auto BuildBr(Address arg, Label label1, Label label2) -> std::shared_ptr<ImpureInstr> {
+    std::vector<Address> args {arg};
+    std::vector<Label> labels { label1, label2 };
+    return std::make_shared<ImpureInstr>(OpCode::JMP, args, labels, 0, 0);
+}
+
+template <typename... Args>
 auto BuildInstr(Address dest, OpCode op, Args... args) -> std::shared_ptr<PureInstr> {
     std::vector<Address> res_vec = {args...};
     return std::make_shared<PureInstr>(op, dest, res_vec, 0, 0);
@@ -90,10 +109,15 @@ auto BuildConstInstr(const Address &dest, int index) -> std::shared_ptr<ConstIns
     return std::make_shared<ConstInstr>(dest, index, 0, 0);
 }
 
+auto BuildLabel(Label label) -> std::shared_ptr<LabelInstr> {
+    return std::make_shared<LabelInstr>(label, 0, 0);
+}
+
 template auto BuildInstr(int, OpCode, int) -> std::shared_ptr<PureInstr>;
 template auto BuildInstr(int, OpCode, int, int) -> std::shared_ptr<PureInstr>;
 template auto BuildInstr(Address, OpCode, const char *, const char *) -> std::shared_ptr<PureInstr>;
 template auto BuildInstr(Address, OpCode, const char *) -> std::shared_ptr<PureInstr>;
+template auto BuildInstr(OpCode, const char *) -> std::shared_ptr<ImpureInstr>;
 template auto BuildValueToken<float>(TokenType, const float &) -> std::shared_ptr<ValueToken<float>>;
 template auto BuildValueToken<int>(TokenType, const int&) -> std::shared_ptr<ValueToken<int>>;
 template auto BuildValueToken<std::string>(TokenType, const std::string&) -> std::shared_ptr<ValueToken<std::string>>;

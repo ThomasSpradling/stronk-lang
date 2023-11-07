@@ -19,7 +19,11 @@ enum class OpCode {
     LABEL,
     CALL,
     PHI,
-    CONST
+    CONST,
+
+    PRINT,
+    JMP,
+    BR,
 };
 
 struct Instr {
@@ -52,6 +56,9 @@ struct Instr {
             case OpCode::CALL: return "CALL";
             case OpCode::PHI: return "PHI";
             case OpCode::CONST: return "CONST";
+            case OpCode::PRINT: return "PRINT";
+            case OpCode::JMP: return "JMP";
+            case OpCode::BR: return "BR";
             default: return "UNKNOWN_INSTR";
         };
     };

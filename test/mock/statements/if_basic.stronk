@@ -1,0 +1,6 @@
+if (2 + 3 == 5) {
+    int a = 6;
+    print a;
+} else {
+    print 9;
+}
