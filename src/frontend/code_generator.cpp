@@ -1,6 +1,7 @@
 #include "frontend/code_generator.h"
 #include <iostream>
 
+namespace stronk {
 // Adds an instruction.
 void CodeGenerator::AddInstruction(const std::shared_ptr<Instr> &instr) {
     bytecode_.push_back(instr);
@@ -28,3 +29,5 @@ void CodeGenerator::DissasembleCode() {
 auto CodeGenerator::GetCode() -> Bytecode {
     return bytecode_;
 }
+
+} // namespace "stronk"

@@ -6,6 +6,8 @@
 #include <unordered_map>
 #include <variant>
 
+namespace stronk {
+
 class ConstantPool {
 public:
     using ConstantValue = std::variant<int, float, char, bool, std::string>;
@@ -17,5 +19,7 @@ private:
     std::vector<ConstantValue> constants_;
     int next_id_ = 0;
 };
+
+}
 
 #endif // _STRONK_CONSTANT_POOL_H

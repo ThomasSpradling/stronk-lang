@@ -3,6 +3,8 @@
 #include <string>
 #include "compiler/compiler.h"
 
+namespace stronk {
+
 // Compiles the source after scanning it.
 auto Compiler::Compile(std::string_view source) -> bool {
     scanner_.LoadSource(source);
@@ -49,3 +51,5 @@ auto Compiler::Compile(std::string_view source) -> bool {
 auto Compiler::GetBytecode() -> Bytecode {
     return bytecode_;
 }
+
+} // namespace "stronk"

@@ -3,6 +3,8 @@
 #include "common/utils.h"
 #include "compiler/compiler.h"
 
+namespace stronk {
+
 #define P(num) (TEMP_VAR_PREFIX + std::to_string(num)).c_str()
 
 TEST(StatementsTests, PrintStatement) {
@@ -78,3 +80,5 @@ TEST(StatementsTests, BasicWhileStatement) {
     };
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
+
+} // namespace "stronk"

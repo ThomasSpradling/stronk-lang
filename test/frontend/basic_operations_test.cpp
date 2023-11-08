@@ -3,6 +3,8 @@
 #include "common/utils.h"
 #include "compiler/compiler.h"
 
+namespace stronk {
+
 TEST(BasicOperationsTests, SimpleInstruction) {
     auto token_result = ReadTokensFromSource("basic_operations/one_instruction.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
@@ -97,13 +99,18 @@ TEST(BasicOperationsTests, Associativity) {
     bytecode_result = ReadBytecodeFromTokens(token_expected);
     bytecode_expected = {
         BuildConstInstr(1, 0),
-        BuildInstr(2, OpCode::NEGATE, 1),
-        BuildInstr(3, OpCode::NEGATE, 2),
-        BuildInstr(4, OpCode::NEGATE, 3),
-        BuildConstInstr(5, 1),
-        BuildInstr(6, OpCode::NEGATE, 5),
-        BuildInstr(7, OpCode::NEGATE, 6),
-        BuildInstr(8, OpCode::SUB, 4, 7),
+        BuildConstInstr(2, 1),
+        BuildInstr(3, OpCode::SUB, 2, 1),
+        BuildConstInstr(4, 1),
+        BuildInstr(5, OpCode::SUB, 4, 3),
+        BuildConstInstr(6, 1),
+        BuildInstr(7, OpCode::SUB, 6, 5),
+        BuildConstInstr(8, 2),
+        BuildConstInstr(9, 1),
+        BuildInstr(10, OpCode::SUB, 9, 8),
+        BuildConstInstr(11, 1),
+        BuildInstr(12, OpCode::SUB, 11, 10),
+        BuildInstr(13, OpCode::SUB, 7, 12),
     };
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
@@ -134,8 +141,11 @@ TEST(BasicOperationsTests, Precedence) {
         BuildInstr(4, OpCode::MULT, 2, 3),
         BuildInstr(5, OpCode::SUB, 1, 4),
         BuildConstInstr(6, 3),
-        BuildInstr(7, OpCode::NEGATE, 6),
-        BuildInstr(8, OpCode::ADD, 5, 7),
+        BuildConstInstr(7, 4),
+        BuildInstr(8, OpCode::SUB, 7, 6),
+        BuildInstr(9, OpCode::ADD, 5, 8),
     };
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
+
+} // namespace "stronk"

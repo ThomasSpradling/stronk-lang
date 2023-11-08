@@ -3,6 +3,8 @@
 #include "common/utils.h"
 #include "compiler/compiler.h"
 
+namespace stronk {
+
 TEST(CommentsTest, SingleLineComment) {
     // Single line comment
     auto token_result = ReadTokensFromSource("comments/single_comment.stronk");
@@ -42,3 +44,5 @@ TEST(CommentsTest, MultilineComments) {
     bytecode_result = ReadBytecodeFromTokens(token_expected);
     ASSERT_EQ(bytecode_result, Bytecode{});
 }
+
+} // namespace "stronk"

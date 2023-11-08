@@ -2,9 +2,12 @@
 #include <fstream>
 #include <sstream>
 #include <filesystem>
+
 #include "common/utils.h"
 #include "frontend/scanner.h"
 #include "config.h" // Generated file from CMakeLists.txt. Make sure to build that first!
+
+namespace stronk {
 
 auto ReadTokensFromSource(const std::string &source) -> std::vector<std::shared_ptr<Token>> {
     std::string base = BASE_DIR;
@@ -113,6 +116,41 @@ auto BuildLabel(Label label) -> std::shared_ptr<LabelInstr> {
     return std::make_shared<LabelInstr>(label, 0, 0);
 }
 
+
+auto operator==(const std::vector<std::shared_ptr<Token>> &list1, const std::vector<std::shared_ptr<Token>> &list2) -> bool {
+    if (list1.size() != list2.size()) {
+        return false;
+    }
+
+    auto it1 = list1.begin();
+    auto it2 = list2.begin();
+    while (it1 != list1.end()) {
+        if (!(**it1 == **it2)) {
+            return false;
+        }
+        it1++;
+        it2++;
+    }
+    return true;
+}
+
+auto operator==(const Bytecode &list1, const Bytecode &list2) -> bool {
+    if (list1.size() != list2.size()) {
+        return false;
+    }
+
+    auto it1 = list1.begin();
+    auto it2 = list2.begin();
+    while (it1 != list1.end()) {
+        if (!(**it1 == **it2)) {
+            return false;
+        }
+        it1++;
+        it2++;
+    }
+    return true;
+}
+
 template auto BuildInstr(int, OpCode, int) -> std::shared_ptr<PureInstr>;
 template auto BuildInstr(int, OpCode, int, int) -> std::shared_ptr<PureInstr>;
 template auto BuildInstr(Address, OpCode, const char *, const char *) -> std::shared_ptr<PureInstr>;
@@ -121,3 +159,5 @@ template auto BuildInstr(OpCode, const char *) -> std::shared_ptr<ImpureInstr>;
 template auto BuildValueToken<float>(TokenType, const float &) -> std::shared_ptr<ValueToken<float>>;
 template auto BuildValueToken<int>(TokenType, const int&) -> std::shared_ptr<ValueToken<int>>;
 template auto BuildValueToken<std::string>(TokenType, const std::string&) -> std::shared_ptr<ValueToken<std::string>>;
+
+} // namespace "stronk"

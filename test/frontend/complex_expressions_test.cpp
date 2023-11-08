@@ -3,6 +3,8 @@
 #include "common/utils.h"
 #include "compiler/compiler.h"
 
+namespace stronk {
+
 TEST(ComplexExpressionsTests, Precedence) {
     auto token_result = ReadTokensFromSource("complex_expressions/precedence.stronk");
     std::vector<std::shared_ptr<Token>> token_expected {
@@ -78,3 +80,5 @@ TEST(ComplexExpressionsTests, Grouping) {
     };
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
+
+} // namespace "stronk"

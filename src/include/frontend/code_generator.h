@@ -2,9 +2,12 @@
 #define _STRONK_CODE_GENERATOR_H
 
 #include <memory>
+
 #include "common/instruction.h"
 #include "common/value.h"
 #include "compiler/constant_pool.h"
+
+namespace stronk {
 
 using Bytecode = std::vector<std::shared_ptr<Instr>>;
 
@@ -21,5 +24,7 @@ public:
     void DissasembleCode();
     auto GetCode() -> Bytecode;
 };
+
+} // namespace "stronk"
 
 #endif // _STRONK_CODE_GENERATOR_H

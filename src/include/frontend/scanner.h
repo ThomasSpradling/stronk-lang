@@ -8,6 +8,8 @@
 #include "common/common.h"
 #include "token.h"
 
+namespace stronk {
+
 // The state of the scanner:
 //  - Normal implies the scanner is currently scanning code.
 //  - String implies the scanner is scanning a potentially formatted string.
@@ -50,5 +52,7 @@ public:
     void LoadSource(std::string_view source);
     auto ScanNextToken() -> std::shared_ptr<Token>;
 };
+
+} // namespace "stronk"
 
 #endif // _STRONK_SCANNER_H

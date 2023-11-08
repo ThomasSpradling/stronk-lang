@@ -4,6 +4,8 @@
 #include <vector>
 #include "common/common.h"
 
+namespace stronk {
+
 struct Value {
     virtual ~Value() = default;
 };
@@ -28,5 +30,7 @@ struct NilValue : public Value {};
 using ValueArray = std::vector<Value>;
 
 void PrintValue(Value val);
+
+} // namespace "stronk"
 
 #endif // _STRONK_VALUE_H

@@ -4,7 +4,6 @@ add_library(
     code_generator.cpp
     parser.cpp
     scanner.cpp
-    token.cpp
 )
 
 set(ALL_OBJECT_FILES

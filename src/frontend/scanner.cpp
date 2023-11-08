@@ -2,6 +2,8 @@
 #include <sstream>
 #include "frontend/scanner.h"
 
+namespace stronk {
+
 /***** Nonmember Functions ***/
 
 // Determines if character a letter or underscore.
@@ -336,3 +338,5 @@ auto Scanner::MakeTypeToken(PrimitiveType type, int width) -> std::shared_ptr<Ty
 auto Scanner::MakeErrorToken(std::string message) -> std::shared_ptr<ValueToken<std::string>> {
     return std::make_unique<ValueToken<std::string>>(TokenType::ERROR, 0, line_, std::move(message));
 }
+
+} // namespace "stronk"

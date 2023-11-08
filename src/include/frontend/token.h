@@ -4,6 +4,8 @@
 #include <string>
 #include <memory>
 
+namespace stronk {
+
 enum class TokenType {
     // Single character tokens
     LEFT_PAREN, RIGHT_PAREN,
@@ -45,6 +47,10 @@ struct Token {
 
     Token(TokenType type, int pos, int line) : type_(type), position_(pos), line_(line) {}
     virtual ~Token() = default;
+
+    virtual auto operator==(const Token& other) const -> bool {
+        return type_ == other.type_;
+    }
 
     virtual auto ToString() const -> std::string {
         switch (type_) {
@@ -112,6 +118,14 @@ struct ValueToken : public Token {
 
     ValueToken(TokenType type, int pos, int line, T value) : Token(type, pos, line), value_(std::move(value)) {}
 
+    auto operator==(const Token &other) const -> bool override {
+        if (auto token = dynamic_cast<const ValueToken *>(&other)) {
+            return (type_ == other.type_) && value_ == token->value_;
+            return true;
+        }
+        return false;
+    }
+
     auto ToString() const -> std::string override {
         std::string res = Token::ToString() + "\t\t'";
         if constexpr (std::is_same_v<T, PrimitiveType>) {
@@ -139,6 +153,6 @@ struct TypeToken : public ValueToken<PrimitiveType> {
     TypeToken(TokenType type, int pos, int line, PrimitiveType value, int width) : ValueToken<PrimitiveType>(type, pos, line, value), width_(width) {}
 };
 
-auto operator==(const std::shared_ptr<Token> &token1, const std::shared_ptr<Token> &token2) -> bool;
+}
 
 #endif // _STRONK_TOKEN_H

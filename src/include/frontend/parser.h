@@ -7,6 +7,8 @@
 #include "frontend/token.h"
 #include "common/number_generator.h"
 
+namespace stronk {
+
 class Parser {
 private:
     CodeGenerator cg_;
@@ -58,5 +60,7 @@ public:
     void Parse();
     auto GetBytecode() -> Bytecode;
 };
+
+} // namespace "stronk"
 
 #endif // _STRONK_PARSER_H

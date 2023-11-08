@@ -2,6 +2,8 @@
 #include <iomanip>
 #include "common/value.h"
 
+namespace stronk {
+
 // Prints a single value with precision 6.
 void PrintValue(Value* val) {
     if (auto bool_val = dynamic_cast<BoolValue*>(val)) {
@@ -18,3 +20,5 @@ void PrintValue(Value* val) {
         std::cout << "Unknown Value Type" << std::endl;
     }
 }
+
+} // namespace "stronk"

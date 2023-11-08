@@ -1,6 +1,8 @@
 #include <iostream>
 #include "frontend/parser.h"
 
+namespace stronk {
+
 #define PARSE_CASE(func, opcode) \
     StepForward(); \
     a = dest; \
@@ -346,9 +348,14 @@ auto Parser::ParseUnary() -> Address {
 
     if (op == TokenType::MINUS) {
         StepForward();
+
+
         Address a = ParseUnary();
+        
+        Address temp = EmitConstInstruction(0);
         Address dest = num_gen_.GenerateTemp();
-        EmitInstruction(dest, OpCode::NEGATE, a);
+        
+        EmitInstruction(dest, OpCode::SUB, temp, a);
         return dest;
     }
     return ParsePrimary();
@@ -424,61 +431,65 @@ auto Parser::ParsePrimary() -> Address {
 // Grammar:
 // string -> ( TEXT | "${" expression "}" )* QUOTE
 auto Parser::ParseString() -> Address {
-    Address dest;
-    if (current_->get()->type_ == TokenType::QUOTE) {
-        return EmitConstInstruction("");
-    }
-    for(;;) {
-        Token &tok = **current_;
-        Address a;
-        Address b;
+    // TODO: Add support back for strings.
+    Address res;
+    return res;
 
-        ValueToken<std::string> *value;
+    // Address dest;
+    // if (current_->get()->type_ == TokenType::QUOTE) {
+    //     return EmitConstInstruction("");
+    // }
+    // for(;;) {
+    //     Token &tok = **current_;
+    //     Address a;
+    //     Address b;
 
-        switch (tok.type_) {
-            case TokenType::TEXT:
-                StepForward();
-                value = dynamic_cast<ValueToken<std::string> *>(previous_->get());
-                if (value == nullptr) {
-                    ErrorAt(*previous_, "Expected string.");
-                } else if (dest.empty()) {
-                    dest = EmitConstInstruction(value->value_);
-                } else {
-                    a = dest;
-                    b = EmitConstInstruction(value->value_);
+    //     ValueToken<std::string> *value;
 
-                    dest = num_gen_.GenerateTemp();
-                    EmitInstruction(dest, OpCode::CONCAT, a, b);
-                }
-                break;
-            case TokenType::DOLLAR_BRACE:
-                StepForward();
-                if (dest.empty()) {
-                    a = ParseExpression();
-                    dest = num_gen_.GenerateTemp();
-                    EmitInstruction(dest, OpCode::TO_STRING, a);
-                } else {
-                    a = dest;
-                    b = ParseExpression();
-                    dest = num_gen_.GenerateTemp();
-                    EmitInstruction(dest, OpCode::TO_STRING, b);
+    //     switch (tok.type_) {
+    //         case TokenType::TEXT:
+    //             StepForward();
+    //             value = dynamic_cast<ValueToken<std::string> *>(previous_->get());
+    //             if (value == nullptr) {
+    //                 ErrorAt(*previous_, "Expected string.");
+    //             } else if (dest.empty()) {
+    //                 dest = EmitConstInstruction(value->value_);
+    //             } else {
+    //                 a = dest;
+    //                 b = EmitConstInstruction(value->value_);
 
-                    b = dest;
+    //                 dest = num_gen_.GenerateTemp();
+    //                 EmitInstruction(dest, OpCode::CONCAT, a, b);
+    //             }
+    //             break;
+    //         case TokenType::DOLLAR_BRACE:
+    //             StepForward();
+    //             if (dest.empty()) {
+    //                 a = ParseExpression();
+    //                 dest = num_gen_.GenerateTemp();
+    //                 EmitInstruction(dest, OpCode::TO_STRING, a);
+    //             } else {
+    //                 a = dest;
+    //                 b = ParseExpression();
+    //                 dest = num_gen_.GenerateTemp();
+    //                 EmitInstruction(dest, OpCode::TO_STRING, b);
 
-                    dest = num_gen_.GenerateTemp();
-                    EmitInstruction(dest, OpCode::CONCAT, a, b);
-                }
-                if (current_->get()->type_ != TokenType::RIGHT_BRACE) {
-                    ErrorAt(*current_, "Expected right brace '}' after interpolation.");
-                }
-                StepForward();
-                break;
-            case TokenType::QUOTE:
-                StepForward();
-                [[fallthrough]];
-            default: return dest;
-        }
-    }
+    //                 b = dest;
+
+    //                 dest = num_gen_.GenerateTemp();
+    //                 EmitInstruction(dest, OpCode::CONCAT, a, b);
+    //             }
+    //             if (current_->get()->type_ != TokenType::RIGHT_BRACE) {
+    //                 ErrorAt(*current_, "Expected right brace '}' after interpolation.");
+    //             }
+    //             StepForward();
+    //             break;
+    //         case TokenType::QUOTE:
+    //             StepForward();
+    //             [[fallthrough]];
+    //         default: return dest;
+    //     }
+    // }
 }
 
 template <typename... Args>
@@ -590,3 +601,7 @@ void Parser::ErrorAt(std::shared_ptr<Token> &token, std::string_view message) {
     std::cerr << ": " << message << "\n";
     error_occurred_ = true;
 }
+
+} // namespace "stronk"
+
+#undef PARSE_CASE

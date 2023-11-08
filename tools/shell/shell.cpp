@@ -26,8 +26,8 @@ static void Repl() {
     // TODO(thomasspradling): Handle REPL scoping.
 
     std::string line;
-    Compiler compiler;
-    VirtualMachine vm;
+    stronk::Compiler compiler;
+    stronk::VirtualMachine vm;
 
     for (;;) {
         std::cout << "> ";
@@ -41,7 +41,7 @@ static void Repl() {
             exit(65); // compile time error
         }
 
-        Bytecode bytecode = compiler.GetBytecode();
+        stronk::Bytecode bytecode = compiler.GetBytecode();
 
         if (vm.Interpret(bytecode)) {
             exit(70); // runtime error
@@ -66,14 +66,14 @@ static void RunFile(std::string_view path) {
 
     std::string source = buffer.str();
 
-    Compiler compiler;
-    VirtualMachine vm;
+    stronk::Compiler compiler;
+    stronk::VirtualMachine vm;
 
     if (compiler.Compile(source)) {
         exit(65); // compile time error
     }
 
-    Bytecode bytecode = compiler.GetBytecode();
+    stronk::Bytecode bytecode = compiler.GetBytecode();
 
     if (vm.Interpret(bytecode)) {
         exit(70); // runtime error
@@ -91,3 +91,5 @@ auto main(int argc, const char *argv[]) -> int {
     }
     return 0;
 }
+
+#undef COMPUTE_PERF

@@ -5,6 +5,8 @@
 #include "compiler/compiler.h"
 #include "common/common.h"
 
+namespace stronk {
+
 #define P(num) (TEMP_VAR_PREFIX + std::to_string(num)).c_str()
 
 TEST(GlobalVariableTests, BasicVariables) {
@@ -85,3 +87,7 @@ TEST(GlobalVariableTests, OverwritingVariables) {
 
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
+
+#undef P
+
+} // namespace "stronk"

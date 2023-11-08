@@ -1,6 +1,7 @@
 #include <stdexcept>
 #include "compiler/constant_pool.h"
 
+namespace stronk {
 
 // Gets a constant from constant pool by id.
 auto ConstantPool::GetConstant(int id) -> ConstantValue {
@@ -26,3 +27,5 @@ auto ConstantPool::AddConstant(ConstantValue val) -> int {
 auto ConstantPool::Size() const -> size_t {
     return next_id_;
 }
+
+} // namespace "stronk"
