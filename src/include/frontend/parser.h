@@ -10,6 +10,11 @@
 namespace stronk {
 
 class Parser {
+public:
+    Parser() = default;
+    void AddToken(std::shared_ptr<Token> token);
+    void Parse();
+    auto GetBytecode() -> Bytecode;
 private:
     CodeGenerator cg_;
 
@@ -22,12 +27,37 @@ private:
     bool error_occurred_ = false;
     bool is_panic_mode_ = false; // Prevents cascade of errors.
 
+    std::unordered_map<std::string, PrimitiveType> symbol_table_;
+
+    // Utility methods
     void StepForward();
     void StepIfMatch(TokenType type, std::string_view message);
+    auto Peek() const -> Token *;
+    void Match(TokenType type, std::string_view message);
     void ErrorAt(std::shared_ptr<Token> &token, std::string_view message);
+    void Error(std::string_view message);
+    template <class T> auto ExtractValue(std::string_view message = "Unexpected token.") -> std::optional<T>;
 
+    // Type Methods
+    auto ConvertType(Address source, PrimitiveType type2) -> Address;
+    auto GetType(Address source) -> std::optional<PrimitiveType>;
+
+    // Symbol Table
+    void AddToTable(Address dest, PrimitiveType type);
+    void UpdateTable(Address dest, PrimitiveType type);
+
+    // Instruction Utilities
+    template <typename... Args> void EmitInstruction(Address &dest, OpCode op, Args... args);
+    auto EmitConstInstruction(const ConstantPool::ConstantValue &val, PrimitiveType type) -> Address;
+    auto EmitConstInstruction(Address &dest, const ConstantPool::ConstantValue &val) -> Address;
+    template <typename... Args> void EmitInstruction(OpCode op, Args... args);
+    void EmitBr(Address cond, Label label1, Label label2);
+    void EmitLabel(Label label);
+    void EmitJmp(Label label);
+
+    // Parser methods
     void ParseDeclaration();
-    void ParseVarDeclaration();
+    auto ParseVarDeclaration() -> Address;
     void ParseStatement();
     void ParseExprStatement();
     void ParseForStatement();
@@ -46,19 +76,6 @@ private:
     auto ParseUnary() -> Address;
     auto ParsePrimary() -> Address;
     auto ParseString() -> Address;
-
-    template <typename... Args> void EmitInstruction(Address &dest, OpCode op, Args... args);
-    auto EmitConstInstruction(const ConstantPool::ConstantValue &val) -> Address;
-    auto EmitConstInstruction(Address &dest, const ConstantPool::ConstantValue &val) -> Address;
-    template <typename... Args> void EmitInstruction(OpCode op, Args... args);
-    void EmitBr(Address cond, Label label1, Label label2);
-    void EmitLabel(Label label);
-    void EmitJmp(Label label);
-public:
-    Parser() = default;
-    void AddToken(std::shared_ptr<Token> token);
-    void Parse();
-    auto GetBytecode() -> Bytecode;
 };
 
 } // namespace "stronk"

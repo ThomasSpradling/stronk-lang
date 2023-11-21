@@ -139,6 +139,20 @@ enum class OpCode {
     */
     FNEQ,
 
+    //// Type Conversion //
+
+    /** F2I x
+     * Arg: x (float)
+     * Result: Places integer conversion into <dest>.
+    */
+   F2I,
+
+    /** I2F x
+     * Arg: x (float)
+     * Result: Places integer conversion into <dest>.
+    */
+   I2F,
+
     //// Logic ////
 
     /** NOT x
@@ -253,6 +267,9 @@ struct Instr {
             case OpCode::FSUB: return "fSUB";
             case OpCode::FMULT: return "fMULT";
             case OpCode::FDIV: return "fDIV";
+
+            case OpCode::F2I: return "FLOAT -> INT";
+            case OpCode::I2F: return "INT -> FLOAT";
 
             case OpCode::EQ: return "EQ";
             case OpCode::GT: return "GT";

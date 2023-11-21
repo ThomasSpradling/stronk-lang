@@ -43,13 +43,17 @@ TEST(BasicOperationsTests, SimpleOperations) {
     Bytecode bytecode_expected = {
         BuildConstInstr(1, 0),
         BuildConstInstr(2, 1),
-        BuildInstr(3, OpCode::MULT, 1, 2),
-        BuildConstInstr(4, 2),
-        BuildInstr(5, OpCode::DIV, 3, 4),
-        BuildConstInstr(6, 3),
-        BuildInstr(7, OpCode::SUB, 5, 6),
-        BuildConstInstr(8, 4),
-        BuildInstr(9, OpCode::ADD, 7, 8)
+        BuildInstr(3, OpCode::I2F, 1),
+        BuildInstr(4, OpCode::FMULT, 3, 2),
+        BuildConstInstr(5, 2),
+        BuildInstr(6, OpCode::I2F, 5),
+        BuildInstr(7, OpCode::FDIV, 4, 6),
+        BuildConstInstr(8, 3),
+        BuildInstr(9, OpCode::I2F, 8),
+        BuildInstr(10, OpCode::FSUB, 7, 9),
+        BuildConstInstr(11, 4),
+        BuildInstr(12, OpCode::I2F, 11),
+        BuildInstr(13, OpCode::FADD, 10, 12)
     };
     ASSERT_EQ(bytecode_result, bytecode_expected);
 }
