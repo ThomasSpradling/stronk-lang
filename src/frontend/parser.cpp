@@ -140,6 +140,7 @@ auto Parser::ConvertType(Address source, PrimitiveType type2) -> Address {
             } else {
                 Error("Cannot convert <type1> to bool.");
             }
+            break;
         case PrimitiveType::CHAR:
             Error("Cannot convert <type1> to bool.");
             break;
@@ -150,6 +151,7 @@ auto Parser::ConvertType(Address source, PrimitiveType type2) -> Address {
             } else {
                 Error("Cannot convert <type1> to bool.");
             }
+            break;
     }
     return dest;
 }
@@ -290,12 +292,16 @@ auto Parser::ParseVarDeclaration() -> Address {
             switch (var_type) {
                 case PrimitiveType::BOOL:
                     default_val = false;
+                    break;
                 case PrimitiveType::INT:
                     default_val = 0;
+                    break;
                 case PrimitiveType::REAL:
                     default_val = (float) 0;
+                    break;
                 case PrimitiveType::CHAR:
                     default_val = (char) 0;
+                    break;
             }
 
             EmitConstInstruction(dest, default_val);
