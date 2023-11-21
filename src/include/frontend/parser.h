@@ -2,6 +2,7 @@
 #define _STRONK_PARSER_H
 
 #include <vector>
+#include <optional>
 #include "common/common.h"
 #include "frontend/code_generator.h"
 #include "frontend/token.h"
